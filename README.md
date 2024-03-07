@@ -26,6 +26,8 @@ API Definition: [OpenAPI Spec](./api/openapi.yaml)
 
 PostgreSQL version 16.1, running in [Docker].
 
+Schema: [schema.sql](./db/schema.sql)
+
 ## Running locally
 
 ### Install Tools
