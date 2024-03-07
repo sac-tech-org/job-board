@@ -1,0 +1,149 @@
+openapi: 3.0.3
+
+info:
+  title: Sac Tech Job Board API
+  version: 0.1.0
+  description: OpenAPI specification for the Sac Tech Job Board API.
+  contact:
+    name: rusher
+    url: https://github.com/rusher2004/job-board/api
+    email: robertinthecloud@icloud.com
+
+servers:
+  - url: http://localhost:8080
+    description: Local server
+
+tags:
+  - name: User
+
+paths:
+  /user:
+    get:
+      operationId: getUserList
+      description: Get list of users
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/UserObject"
+          description: GET User list response
+      tags:
+        - User
+
+    post:
+      operationId: postUser
+      description: Create a new user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserUpdatePayload"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserObject"
+          description: POST User object response
+          links:
+            GetUserByID:
+              operationId: getUserByID
+              parameters:
+                id: "$response.body#/id"
+              description: \
+                The `id` value returned in the response as the `id` parameter in
+                `GET /user/{id}`
+      tags:
+        - User
+
+  /user/{user_uuid}:
+    parameters:
+      - $ref: "#/components/parameters/userUUIDPath"
+      - description: User UUID
+        in: path
+        name: uuid
+        required: true
+        schema:
+          type: string
+          format: uuid
+    delete:
+      operationId: deleteUserByID
+      description: Delete user by ID
+      responses:
+        "204":
+          description: "User succussfully deleted"
+      tags:
+        - User
+    get:
+      operationId: getUserByID
+      description: Get user by ID
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserObject"
+          description: GET User object response
+      tags:
+        - User
+    put:
+      operationId: putUserByID
+      description: Update user by ID
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserUpdatePayload"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserObject"
+          description: PUT User object response
+      tags:
+        - User
+
+components:
+  parameters:
+    userUUIDPath:
+      in: path
+      name: user uuid
+      required: true
+      schema:
+        type: string
+        format: uuid
+        description: Processor name
+
+  schemas:
+    UserObject:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        uuid:
+          type: string
+          format: uuid
+        firstName:
+          type: string
+        lastName:
+          type: string
+    UserUpdatePayload:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+        firstName:
+          type: string
+        lastName:
+          type: string
+        username:
+          type: string
+          maxLength: 16

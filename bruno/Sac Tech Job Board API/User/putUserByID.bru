@@ -1,0 +1,11 @@
+meta {
+  name: putUserByID
+  type: http
+  seq: 5
+}
+
+put {
+  url: http://localhost:8080/user/{user_uuid}
+  body: json
+  auth: none
+}

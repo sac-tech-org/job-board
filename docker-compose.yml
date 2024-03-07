@@ -1,0 +1,7 @@
+version: '3'
+
+include:
+  - path: db/docker-compose.yml
+
+volumes:
+  pgdata:
