@@ -1,18 +1,13 @@
+<script setup lang="ts">
+import FooterView from './components/FooterView.vue';
+import HeaderView from './components/HeaderView.vue';
+import HeroSection from './components/HeroSection.vue';
+import MainView from './components/MainView.vue';
+</script>
 
 <template>
-<div id="wrapper">
-  <header>
-    <h1>Hello!</h1>
-  </header>
-  <main>
-    <p>More to come...</p>
-  </main>
-</div>
+  <HeaderView />
+  <!-- <HeroSection class="sticky top-4" /> -->
+  <MainView />
+  <!-- <FooterView class="bg-blue-500" /> -->
 </template>
-
-<style scoped>
-#wrapper {
-  display: flex;
-  flex-direction: column;
-}
-</style>
