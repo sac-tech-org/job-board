@@ -1,13 +1,35 @@
 <script setup lang="ts">
-import FooterView from './components/FooterView.vue';
-import HeaderView from './components/HeaderView.vue';
-import HeroSection from './components/HeroSection.vue';
-import MainView from './components/MainView.vue';
+import { ref, } from 'vue';
+import { useUserStore } from '@/stores/user';
+
+import HeaderView from '@/components/HeaderView.vue';
+import LoginScreen from '@/components/LoginScreen.vue';
+import ModalView from '@/components/ModalView.vue';
+
+const modalOpen = ref(false);
+
+const userStore = useUserStore();
+
+userStore.$subscribe((_, state) => {
+  if (!state.loggedIn) {
+    closeLoginModal();
+  }
+})
+
+function closeLoginModal() {
+  modalOpen.value = false;
+}
+
+function openLoginModal() {
+  modalOpen.value = true;
+}
 </script>
 
 <template>
-  <HeaderView />
-  <!-- <HeroSection class="sticky top-4" /> -->
-  <MainView />
-  <!-- <FooterView class="bg-blue-500" /> -->
+  <HeaderView :loggedIn="userStore.loggedIn" @open-login-modal="openLoginModal" />
+  <RouterView />
+
+  <ModalView :open="modalOpen" @modalClosed="closeLoginModal" title="Login" class="h-4/5 w-1/2 mt-10">
+    <LoginScreen />
+  </ModalView>
 </template>
