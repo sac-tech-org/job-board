@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, } from 'vue';
+import { ref } from 'vue';
 import { useUserStore } from '@/stores/user';
 
 import HeaderView from '@/components/HeaderView.vue';
@@ -14,7 +14,7 @@ userStore.$subscribe((_, state) => {
   if (!state.loggedIn) {
     closeLoginModal();
   }
-})
+});
 
 function closeLoginModal() {
   modalOpen.value = false;
@@ -29,7 +29,7 @@ function openLoginModal() {
   <HeaderView :loggedIn="userStore.loggedIn" @open-login-modal="openLoginModal" />
   <RouterView />
 
-  <ModalView :open="modalOpen" @modalClosed="closeLoginModal" title="Login" class="h-4/5 w-1/2 mt-10">
+  <ModalView :open="modalOpen" @modalClosed="closeLoginModal" title="Login" class="h-3/5 w-1/2 top-[10%]">
     <LoginScreen />
   </ModalView>
 </template>

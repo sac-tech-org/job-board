@@ -11,7 +11,7 @@ const emit = defineEmits(['modalClosed']);
 </script>
 
 <template>
-  <dialog :open class="flex-auto py-2 px-4 rounded-lg shadow-lg my-auto">
+  <dialog :open class="flex-auto py-2 px-4 rounded-lg shadow-lg">
     <header class="flex justify-between">
       <h2 class="text-lg font-semibold">{{ title }}</h2>
       <button @click="emit('modalClosed')">
