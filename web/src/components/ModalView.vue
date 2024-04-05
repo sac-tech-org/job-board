@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import FAIcon from './FAIcon.vue';
+import FAIcon from '@/components/FAIcon.vue';
 
 interface Props {
   open: boolean;
@@ -7,16 +7,15 @@ interface Props {
 }
 
 const { open, title } = defineProps<Props>();
-const emit = defineEmits(["modalClosed"]);
-
+const emit = defineEmits(['modalClosed']);
 </script>
 
 <template>
-  <dialog :open class="flex-auto py-2 px-4 rounded-lg shadow-lg">
+  <dialog :open class="flex-auto py-2 px-4 rounded-lg shadow-lg my-auto">
     <header class="flex justify-between">
       <h2 class="text-lg font-semibold">{{ title }}</h2>
       <button @click="emit('modalClosed')">
-        <FAIcon :icon="'fa-regular fa-circle-xmark'" :size="'xl'" hover-grow />
+        <FAIcon icon="fa-regular fa-circle-xmark" size="xl" hover-grow />
       </button>
     </header>
     <hr class="my-2" />
