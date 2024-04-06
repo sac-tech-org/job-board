@@ -11,6 +11,9 @@ import (
 	"github.com/rusher2004/job-board/api/datastore"
 	"github.com/rusher2004/job-board/api/db"
 	"github.com/rusher2004/job-board/api/server"
+	"github.com/supertokens/supertokens-golang/recipe/session"
+	"github.com/supertokens/supertokens-golang/recipe/thirdpartyemailpassword"
+	"github.com/supertokens/supertokens-golang/supertokens"
 
 	_ "github.com/lib/pq"
 )
@@ -53,4 +56,28 @@ func getDBConfig() (db.ConnectConfig, error) {
 		User:     user,
 		Password: password,
 	}, nil
+}
+
+func doSuperTokensStuff() error {
+	// https://supertokens.com/docs/thirdpartyemailpassword/pre-built-ui/setup/backend
+
+	basePath := "/auth"
+
+	return supertokens.Init(supertokens.TypeInput{
+		Supertokens: &supertokens.ConnectionInfo{
+			ConnectionURI: "",
+			APIKey:        "",
+		},
+		AppInfo: supertokens.AppInfo{
+			AppName:         "Sac Tech Job Board",
+			APIDomain:       "http://localhost:8080",
+			WebsiteDomain:   "http://localhost:5173",
+			APIBasePath:     &basePath,
+			WebsiteBasePath: &basePath,
+		},
+		RecipeList: []supertokens.Recipe{
+			thirdpartyemailpassword.Init(nil),
+			session.Init(nil),
+		},
+	})
 }
