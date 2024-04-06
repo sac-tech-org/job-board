@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
+import { useRouter } from 'vue-router';
 
 import FAIcon from '@/components/FAIcon.vue';
 import PopoverMenu from '@/components/PopoverMenu.vue';
@@ -9,6 +10,7 @@ interface Props {
   loggedIn: boolean;
 }
 
+const router = useRouter();
 const menuOpen = ref(false);
 const { loggedIn } = defineProps<Props>();
 const emit = defineEmits(['openLoginModal']);
@@ -22,7 +24,7 @@ const emit = defineEmits(['openLoginModal']);
         <button v-if="loggedIn" @click="menuOpen = !menuOpen">
           <FAIcon icon="fa-regular fa-circle-user" size="2xl" />
         </button>
-        <button v-else @click="emit('openLoginModal')">
+        <button v-else @click="$router.push('/auth')">
           <span class="pr-2 text-lg">Login</span>
           <FAIcon icon="fa-solid fa-arrow-right-to-bracket" size="xl" />
         </button>
