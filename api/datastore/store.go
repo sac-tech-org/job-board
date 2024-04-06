@@ -12,10 +12,9 @@ type DBClient interface {
 }
 
 type DataStore struct {
-	lambdaClient any
-	db           DBClient
+	db DBClient
 }
 
-func NewDataStore(cl any, db DBClient) DataStore {
-	return DataStore{cl, db}
+func NewDataStore(db DBClient) DataStore {
+	return DataStore{db}
 }

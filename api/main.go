@@ -29,7 +29,7 @@ func main() {
 	}
 	defer db.Close()
 
-	d := datastore.NewDataStore("some api client", &db)
+	d := datastore.NewDataStore(&db)
 	s := server.NewServer(d)
 
 	log.Println("starting server on port 8080")
