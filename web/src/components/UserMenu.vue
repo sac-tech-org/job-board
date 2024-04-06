@@ -15,6 +15,10 @@ function goToProfile() {
 <template>
   <div class="w-24 flex flex-col divide-y">
     <UserMenuItem @click="goToProfile" icon="fa-regular fa-address-card" text="Profile" />
-    <UserMenuItem @click="userStore.logout" icon="fa-solid fa-arrow-right-from-bracket" text="Log Out" />
+    <UserMenuItem
+      @click="userStore.logout"
+      icon="fa-solid fa-arrow-right-from-bracket"
+      text="Log Out"
+    />
   </div>
 </template>

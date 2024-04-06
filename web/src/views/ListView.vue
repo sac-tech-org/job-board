@@ -84,11 +84,18 @@ function modalClosed() {
 </script>
 
 <template>
-  <ModalView :open="modalOpen" @modalClosed="modalClosed" title="Job Details" class="h-4/6 w-1/2 mt-10">
+  <ModalView
+    :open="modalOpen"
+    @modalClosed="modalClosed"
+    title="Job Details"
+    class="h-4/6 w-1/2 mt-10"
+  >
     <JobView v-if="selectedJob" :job="selectedJob" />
   </ModalView>
 
-  <section class="flex flex-col rounded shadow-lg grow min-h-0 bg-slate-300 divide-y-2 divide-slate-700/50">
+  <section
+    class="flex flex-col rounded shadow-lg grow min-h-0 bg-slate-300 divide-y-2 divide-slate-700/50"
+  >
     <header class="flex justify-between items-center p-4">
       <h1 class="text-2xl font-semibold">Jobs</h1>
       <div class="flex justify-between items-center gap-2">
@@ -102,8 +109,13 @@ function modalClosed() {
       </div>
     </header>
     <div class="divide-y divide-slate-600/50 overflow-y-scroll">
-      <ListItem v-for="j in jobs" :job="j" :key="j.id" :disableClick="selectedJob !== null && selectedJob.id !== j.id"
-        @selected="onSelected(j.id)" />
+      <ListItem
+        v-for="j in jobs"
+        :job="j"
+        :key="j.id"
+        :disableClick="selectedJob !== null && selectedJob.id !== j.id"
+        @selected="onSelected(j.id)"
+      />
     </div>
   </section>
 </template>

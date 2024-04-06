@@ -2,8 +2,8 @@
 import { ref } from 'vue';
 import { useUserStore } from '@/stores/user';
 
+import AuthView from '@/views/AuthView.vue';
 import HeaderView from '@/components/HeaderView.vue';
-import LoginScreen from '@/components/LoginScreen.vue';
 import ModalView from '@/components/ModalView.vue';
 
 const modalOpen = ref(false);
@@ -30,6 +30,6 @@ function openLoginModal() {
   <RouterView />
 
   <ModalView :open="modalOpen" @modalClosed="closeLoginModal" title="Login" class="h-3/5 w-1/2 top-[10%]">
-    <LoginScreen />
+    <AuthView />
   </ModalView>
 </template>
