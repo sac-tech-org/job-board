@@ -12,20 +12,21 @@ import (
 	"github.com/rusher2004/job-board/api/datastore"
 	"github.com/rusher2004/job-board/api/db"
 	"github.com/rusher2004/job-board/api/server"
+	"github.com/rusher2004/job-board/api/userstore"
 
 	_ "github.com/lib/pq"
 )
 
 func main() {
+	// setup auth store
 	authCfg, err := getAuthConfig()
 	if err != nil {
 		log.Fatalf("error getting auth config: %v", err)
 	}
-
 	socCFG := getSocialConfigs()
-
 	a := auth.NewAuthStore(authCfg, socCFG)
 
+	// setup data store
 	dsn, err := getDBConfig()
 	if err != nil {
 		log.Fatalf("error getting dsn: %v", err)
@@ -37,7 +38,11 @@ func main() {
 	defer db.Close()
 
 	d := datastore.NewDataStore(&db)
-	s, err := server.NewServer(&a, d)
+
+	// setup user store
+	u := userstore.NewUserStore()
+
+	s, err := server.NewServer(&a, d, u)
 	if err != nil {
 		log.Fatal(err)
 	}

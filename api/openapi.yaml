@@ -60,12 +60,12 @@ paths:
       tags:
         - User
 
-  /user/{user_uuid}:
+  /user/{user_id}:
     parameters:
-      - $ref: "#/components/parameters/userUUIDPath"
-      - description: User UUID
+      - $ref: "#/components/parameters/userIDPath"
+      - description: User ID
         in: path
-        name: uuid
+        name: id
         required: true
         schema:
           type: string
@@ -111,9 +111,9 @@ paths:
 
 components:
   parameters:
-    userUUIDPath:
+    userIDPath:
       in: path
-      name: user uuid
+      name: user id
       required: true
       schema:
         type: string
@@ -127,7 +127,7 @@ components:
         email:
           type: string
           format: email
-        uuid:
+        id:
           type: string
           format: uuid
         firstName:

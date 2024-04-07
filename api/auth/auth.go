@@ -6,6 +6,7 @@ import (
 	"github.com/supertokens/supertokens-golang/recipe/thirdparty/tpmodels"
 	"github.com/supertokens/supertokens-golang/recipe/thirdpartyemailpassword"
 	"github.com/supertokens/supertokens-golang/recipe/thirdpartyemailpassword/tpepmodels"
+	"github.com/supertokens/supertokens-golang/recipe/usermetadata"
 	"github.com/supertokens/supertokens-golang/supertokens"
 )
 
@@ -71,6 +72,7 @@ func (a *AuthStore) GetTypeInput() supertokens.TypeInput {
 			}),
 			session.Init(nil),
 			dashboard.Init(nil),
+			usermetadata.Init(nil),
 		},
 	}
 }
