@@ -6,10 +6,10 @@ import MainView from '@/views/MainView.vue';
 import UserProfile from '@/views/UserProfile.vue';
 
 const routes = [
-  { path: '/', component: MainView },
-  { path: '/auth', component: AuthView },
-  { path: '/auth/callback', component: AuthCallbackView },
-  { path: '/user/:id', component: UserProfile },
+  { path: '/', name: 'home', component: MainView },
+  { path: '/auth', name: 'auth', component: AuthView },
+  { path: '/auth/callback/:provider', name: 'authCallback', component: AuthCallbackView },
+  { path: '/user/:id', name: 'userProfile', component: UserProfile },
 ];
 
 const router = createRouter({
