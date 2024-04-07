@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 
+	"github.com/go-chi/chi/v5"
 	"github.com/supertokens/supertokens-golang/recipe/session"
 	"github.com/supertokens/supertokens-golang/recipe/session/sessmodels"
 	"github.com/supertokens/supertokens-golang/supertokens"
@@ -24,6 +25,15 @@ var userIDCTXKey = &contextKey{"userID"}
 func ContextValue[T any](ctx context.Context, key *contextKey) *T {
 	val, _ := ctx.Value(key).(*T)
 	return val
+}
+
+func withUserID(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		id := chi.URLParam(r, "id")
+		ctx := context.WithValue(r.Context(), userIDCTXKey, &id)
+
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
 }
 
 // withUserSession will check for a session and add the userID to the request context. If no session

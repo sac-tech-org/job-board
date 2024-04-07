@@ -14,6 +14,12 @@ import (
 	"github.com/supertokens/supertokens-golang/supertokens"
 )
 
+type AuthStore interface {
+	GetProviders() []tpmodels.ProviderInput
+	GetTypeInput() supertokens.TypeInput
+	GetWebURI() string
+}
+
 type DataStore interface {
 	DeleteUser(context.Context, DeleteUserInput) error
 	GetUser(context.Context, GetUserInput) (User, error)
@@ -22,16 +28,16 @@ type DataStore interface {
 	PutUser(context.Context, PutUserInput) (User, error)
 }
 
-type AuthStore interface {
-	GetProviders() []tpmodels.ProviderInput
-	GetTypeInput() supertokens.TypeInput
-	GetWebURI() string
+type UserStore interface {
+	GetMetadata(string) (UserMetadata, error)
+	UpdateMetadata(string, UserMetadata) (UserMetadata, error)
 }
 
 type Server struct {
 	authStore AuthStore
 	dataStore DataStore
 	router    http.Handler
+	userStore UserStore
 }
 
 type HTTPError struct {
@@ -80,8 +86,8 @@ func (s *Server) routes() {
 		AllowedHeaders:   append([]string{"Content-Type"}, supertokens.GetAllCORSHeaders()...),
 		AllowCredentials: true,
 	}))
-
 	r.Use(supertokens.Middleware)
+	r.Use(middleware.Recoverer)
 
 	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
@@ -95,7 +101,8 @@ func (s *Server) routes() {
 		userRoute.Post("/", s.handlePostUser)
 
 		userRoute.Route("/{id}", func(userIDRoute chi.Router) {
-			userIDRoute.Use(withUserSession)
+			// userIDRoute.Use(withUserSession)
+			userIDRoute.Use(withUserID)
 			userIDRoute.Delete("/", s.handleDeleteUser)
 			userIDRoute.Get("/", s.handleGetUser)
 			userIDRoute.Put("/", s.handlePutUser)
@@ -105,10 +112,11 @@ func (s *Server) routes() {
 	s.router = r
 }
 
-func NewServer(a AuthStore, d DataStore) (Server, error) {
+func NewServer(a AuthStore, d DataStore, u UserStore) (Server, error) {
 	s := Server{
 		authStore: a,
 		dataStore: d,
+		userStore: u,
 	}
 
 	if err := s.superTokenInit(); err != nil {

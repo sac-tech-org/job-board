@@ -71,7 +71,7 @@ func (c *Client) InsertUser(ctx context.Context, email, first, last, username st
 		FirstName: first,
 		LastName:  last,
 		Username:  username,
-		UUID:      uuid.MustParse(outUUID),
+		ID:        uuid.MustParse(outUUID),
 	}, nil
 }
 
@@ -102,6 +102,6 @@ func (c *Client) QueryUserByID(ctx context.Context, id uuid.UUID) (datastore.Use
 		FirstName: user.FirstName,
 		LastName:  user.LastName,
 		Username:  user.Username,
-		UUID:      user.UUID,
+		ID:        user.UUID,
 	}, nil
 }

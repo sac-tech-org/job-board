@@ -110,6 +110,11 @@ async function signIn() {
   // router.push('/');
 }
 
+async function signOut() {
+  await Session.signOut();
+  router.push('/');
+}
+
 async function signUp() {
   const response = await ThirdPartyEmailPassword.emailPasswordSignUp({
     formFields: [

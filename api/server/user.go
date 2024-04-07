@@ -5,17 +5,15 @@ import (
 	"errors"
 	"log"
 	"net/http"
-
-	"github.com/google/uuid"
 )
 
 type (
 	DeleteUserInput struct {
-		UUID uuid.UUID `json:"id"`
+		ID string `json:"id"`
 	}
 
 	GetUserInput struct {
-		UUID uuid.UUID `json:"id"`
+		ID string `json:"id"`
 	}
 
 	GetUserListInput struct{}
@@ -28,17 +26,23 @@ type (
 	}
 
 	PutUserInput struct {
-		Email string `json:"email,omitempty"`
-		UUID  uuid.UUID
-		Name  string `json:"name,omitempty"`
+		FirstName string `json:"firstName,omitempty"`
+		LastName  string `json:"lastName,omitempty"`
+		Username  string `json:"username,omitempty"`
 	}
 
 	User struct {
-		Email     string    `json:"email"`
-		FirstName string    `json:"firstName"`
-		LastName  string    `json:"lastName"`
-		UUID      uuid.UUID `json:"uuid"`
-		Username  string    `json:"username"`
+		Email     string `json:"email"`
+		FirstName string `json:"firstName"`
+		LastName  string `json:"lastName"`
+		ID        string `json:"uuid"`
+		Username  string `json:"username"`
+	}
+
+	UserMetadata struct {
+		FirstName string `json:"firstName"`
+		LastName  string `json:"lastName"`
+		Username  string `json:"username"`
 	}
 )
 
@@ -46,7 +50,7 @@ var UserNotFound = HTTPError{http.StatusNotFound, "User not found"}
 
 func (s *Server) handleDeleteUser(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	id := *ContextValue[uuid.UUID](ctx, userIDCTXKey)
+	id := *ContextValue[string](ctx, userIDCTXKey)
 
 	if err := s.dataStore.DeleteUser(ctx, DeleteUserInput{id}); err != nil {
 		respond(w, r, nil, err, 0)
@@ -58,9 +62,9 @@ func (s *Server) handleDeleteUser(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) handleGetUser(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	id := *ContextValue[uuid.UUID](ctx, userIDCTXKey)
+	id := *ContextValue[string](ctx, userIDCTXKey)
 
-	out, err := s.dataStore.GetUser(ctx, GetUserInput{id})
+	out, err := s.userStore.GetMetadata(id)
 	if err != nil {
 		if errors.Is(err, UserNotFound) {
 			respond(w, r, nil, UserNotFound, 0)
@@ -115,9 +119,9 @@ func (s *Server) handlePutUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ctx := r.Context()
-	in.UUID = *ContextValue[uuid.UUID](ctx, userIDCTXKey)
+	id := *ContextValue[string](ctx, userIDCTXKey)
 
-	out, err := s.dataStore.PutUser(ctx, in)
+	out, err := s.userStore.UpdateMetadata(id, UserMetadata(in))
 	if err != nil {
 		respond(w, r, nil, err, 0)
 		return
