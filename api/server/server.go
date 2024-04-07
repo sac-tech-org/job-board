@@ -4,10 +4,14 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/cors"
+	"github.com/supertokens/supertokens-golang/recipe/thirdparty/tpmodels"
+	"github.com/supertokens/supertokens-golang/supertokens"
 )
 
 type DataStore interface {
@@ -18,7 +22,14 @@ type DataStore interface {
 	PutUser(context.Context, PutUserInput) (User, error)
 }
 
+type AuthStore interface {
+	GetProviders() []tpmodels.ProviderInput
+	GetTypeInput() supertokens.TypeInput
+	GetWebURI() string
+}
+
 type Server struct {
+	authStore AuthStore
 	dataStore DataStore
 	router    http.Handler
 }
@@ -63,6 +74,14 @@ func (s *Server) Router() http.Handler {
 func (s *Server) routes() {
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
+	r.Use(cors.Handler(cors.Options{
+		AllowedOrigins:   []string{s.authStore.GetWebURI()},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   append([]string{"Content-Type"}, supertokens.GetAllCORSHeaders()...),
+		AllowCredentials: true,
+	}))
+
+	r.Use(supertokens.Middleware)
 
 	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
@@ -76,7 +95,7 @@ func (s *Server) routes() {
 		userRoute.Post("/", s.handlePostUser)
 
 		userRoute.Route("/{id}", func(userIDRoute chi.Router) {
-			userIDRoute.Use(withUserID)
+			userIDRoute.Use(withUserSession)
 			userIDRoute.Delete("/", s.handleDeleteUser)
 			userIDRoute.Get("/", s.handleGetUser)
 			userIDRoute.Put("/", s.handlePutUser)
@@ -86,10 +105,22 @@ func (s *Server) routes() {
 	s.router = r
 }
 
-func NewServer(d DataStore) Server {
-	s := Server{dataStore: d}
+func NewServer(a AuthStore, d DataStore) (Server, error) {
+	s := Server{
+		authStore: a,
+		dataStore: d,
+	}
+
+	if err := s.superTokenInit(); err != nil {
+		return Server{}, fmt.Errorf("error initializing SuperTokens: %w", err)
+	}
 
 	s.routes()
 
-	return s
+	return s, nil
+}
+
+func (s *Server) superTokenInit() error {
+	// https://supertokens.com/docs/thirdpartyemailpassword/pre-built-ui/setup/backend
+	return supertokens.Init(s.authStore.GetTypeInput())
 }

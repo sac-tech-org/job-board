@@ -4,8 +4,9 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/go-chi/chi/v5"
-	"github.com/google/uuid"
+	"github.com/supertokens/supertokens-golang/recipe/session"
+	"github.com/supertokens/supertokens-golang/recipe/session/sessmodels"
+	"github.com/supertokens/supertokens-golang/supertokens"
 )
 
 // contextKey for key/vals held in request context
@@ -25,19 +26,34 @@ func ContextValue[T any](ctx context.Context, key *contextKey) *T {
 	return val
 }
 
-func withUserID(next http.Handler) http.Handler {
+// withUserSession will check for a session and add the userID to the request context. If no session
+// exists the request will continue without a userID in the context.
+func withUserSession(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		id := chi.URLParam(r, "id")
-
-		u, err := uuid.Parse(id)
+		required := false
+		sess, err := session.GetSession(r, w, &sessmodels.VerifySessionOptions{
+			SessionRequired: &required,
+		})
 		if err != nil {
-			hErr := HTTPError{http.StatusUnprocessableEntity, "invalid id format"}
-			respond(w, r, nil, hErr, hErr.status)
+			// let supertokens handle its errors
+			if err := supertokens.ErrorHandler(err, r, w); err != nil {
+				// catch some other unknown errors
+				hErr := HTTPError{http.StatusInternalServerError, "error getting session"}
+				respond(w, r, nil, hErr, hErr.status)
+			}
 			return
 		}
 
-		ctx := context.WithValue(r.Context(), userIDCTXKey, &u)
+		if sess != nil {
+			// session exists, add userID to context
+			id := sess.GetUserID()
+			ctx := context.WithValue(r.Context(), userIDCTXKey, &id)
 
-		next.ServeHTTP(w, r.WithContext(ctx))
+			next.ServeHTTP(w, r.WithContext(ctx))
+			return
+		}
+
+		// no session, continue
+		next.ServeHTTP(w, r)
 	})
 }

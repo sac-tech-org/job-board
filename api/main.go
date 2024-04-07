@@ -8,17 +8,24 @@ import (
 	"os"
 
 	"github.com/joho/godotenv"
+	"github.com/rusher2004/job-board/api/auth"
 	"github.com/rusher2004/job-board/api/datastore"
 	"github.com/rusher2004/job-board/api/db"
 	"github.com/rusher2004/job-board/api/server"
-	"github.com/supertokens/supertokens-golang/recipe/session"
-	"github.com/supertokens/supertokens-golang/recipe/thirdpartyemailpassword"
-	"github.com/supertokens/supertokens-golang/supertokens"
 
 	_ "github.com/lib/pq"
 )
 
 func main() {
+	authCfg, err := getAuthConfig()
+	if err != nil {
+		log.Fatalf("error getting auth config: %v", err)
+	}
+
+	socCFG := getSocialConfigs()
+
+	a := auth.NewAuthStore(authCfg, socCFG)
+
 	dsn, err := getDBConfig()
 	if err != nil {
 		log.Fatalf("error getting dsn: %v", err)
@@ -30,10 +37,43 @@ func main() {
 	defer db.Close()
 
 	d := datastore.NewDataStore(&db)
-	s := server.NewServer(d)
+	s, err := server.NewServer(&a, d)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	log.Println("starting server on port 8080")
 	log.Fatal(http.ListenAndServe(":8080", s.Router()))
+}
+
+func getAuthConfig() (auth.AuthConfig, error) {
+	if err := godotenv.Load(); err != nil {
+		return auth.AuthConfig{}, fmt.Errorf("error loading .env file: %w", err)
+	}
+
+	var (
+		apiDomain  = os.Getenv("AUTH_API_DOMAIN")
+		apiKey     = os.Getenv("AUTH_API_KEY")
+		appName    = os.Getenv("AUTH_APP_NAME")
+		basePath   = os.Getenv("AUTH_BASE_PATH")
+		connURI    = os.Getenv("AUTH_CONN_URI")
+		siteDomain = os.Getenv("AUTH_SITE_DOMAIN")
+		siteURI    = os.Getenv("AUTH_SITE_URI")
+	)
+
+	if apiDomain == "" || apiKey == "" || appName == "" || basePath == "" || connURI == "" || siteDomain == "" || siteURI == "" {
+		return auth.AuthConfig{}, fmt.Errorf("some auth config is missing")
+	}
+
+	return auth.AuthConfig{
+		APIDomain:  apiDomain,
+		APIKey:     apiKey,
+		AppName:    appName,
+		BasePath:   basePath,
+		ConnURI:    connURI,
+		SiteDomain: siteDomain,
+		SiteURI:    siteURI,
+	}, nil
 }
 
 func getDBConfig() (db.ConnectConfig, error) {
@@ -58,26 +98,22 @@ func getDBConfig() (db.ConnectConfig, error) {
 	}, nil
 }
 
-func doSuperTokensStuff() error {
-	// https://supertokens.com/docs/thirdpartyemailpassword/pre-built-ui/setup/backend
-
-	basePath := "/auth"
-
-	return supertokens.Init(supertokens.TypeInput{
-		Supertokens: &supertokens.ConnectionInfo{
-			ConnectionURI: "",
-			APIKey:        "",
+func getSocialConfigs() []auth.SocialConfig {
+	return []auth.SocialConfig{
+		{
+			ProviderName: "github",
+			ClientID:     os.Getenv("GITHUB_CLIENT_ID"),
+			ClientSecret: os.Getenv("GITHUB_CLIENT_SECRET"),
 		},
-		AppInfo: supertokens.AppInfo{
-			AppName:         "Sac Tech Job Board",
-			APIDomain:       "http://localhost:8080",
-			WebsiteDomain:   "http://localhost:5173",
-			APIBasePath:     &basePath,
-			WebsiteBasePath: &basePath,
+		{
+			ProviderName: "google",
+			ClientID:     os.Getenv("GOOGLE_CLIENT_ID"),
+			ClientSecret: os.Getenv("GOOGLE_CLIENT_SECRET"),
 		},
-		RecipeList: []supertokens.Recipe{
-			thirdpartyemailpassword.Init(nil),
-			session.Init(nil),
+		{
+			ProviderName: "linkedin",
+			ClientID:     os.Getenv("LINKEDIN_CLIENT_ID"),
+			ClientSecret: os.Getenv("LINKEDIN_CLIENT_SECRET"),
 		},
-	})
+	}
 }
