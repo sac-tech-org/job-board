@@ -1,8 +1,9 @@
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import router from '@/router';
 import { defineStore } from 'pinia';
 import { type User } from '../types';
 import Session from 'supertokens-web-js/recipe/session';
+import EmailVerifcation from 'supertokens-web-js/recipe/emailverification';
 import ThirdPartyEmailPassword from 'supertokens-web-js/recipe/thirdpartyemailpassword';
 
 interface Errors {
@@ -13,9 +14,13 @@ interface Errors {
 
 export const useUserStore = defineStore('user', () => {
   const user = ref<User | null>(null);
-  const hasError = ref(false);
-  const errors = ref<Errors>({ errorMessage: 'Something went wrong' });
+  const errors = ref<Errors>({});
+  const loading = ref(false);
   const loggedIn = ref(false);
+
+  const hasError = computed(() => {
+    return !!errors.value.errorMessage || !!errors.value.emailError || !!errors.value.passwordError;
+  });
 
   async function checkSession() {
     console.log('checking login status');
@@ -28,20 +33,20 @@ export const useUserStore = defineStore('user', () => {
 
   function clearErrors() {
     errors.value = {};
-    hasError.value = false;
   }
 
   async function login(email: string, password: string) {
-    const response = await ThirdPartyEmailPassword.emailPasswordSignIn({
-      formFields: [
-        { id: 'email', value: email },
-        { id: 'password', value: password },
-      ],
-    });
+    const response = await withLoading(() =>
+      ThirdPartyEmailPassword.emailPasswordSignIn({
+        formFields: [
+          { id: 'email', value: email },
+          { id: 'password', value: password },
+        ],
+      }),
+    );
 
     if (response.status === 'WRONG_CREDENTIALS_ERROR') {
       errors.value.errorMessage = 'Invalid credentials';
-      hasError.value = true;
       return;
     }
 
@@ -76,19 +81,28 @@ export const useUserStore = defineStore('user', () => {
     }
   }
 
+  async function sendVerificationEmail() {
+    const response = await withLoading(EmailVerifcation.sendVerificationEmail);
+    if (response.status === 'EMAIL_ALREADY_VERIFIED_ERROR') {
+      errors.value.errorMessage = 'Email already verified';
+    }
+  }
+
   async function signUp(email: string, password: string) {
-    const response = await ThirdPartyEmailPassword.emailPasswordSignUp({
-      formFields: [
-        {
-          id: 'email',
-          value: email,
-        },
-        {
-          id: 'password',
-          value: password,
-        },
-      ],
-    });
+    const response = await withLoading(() =>
+      ThirdPartyEmailPassword.emailPasswordSignUp({
+        formFields: [
+          {
+            id: 'email',
+            value: email,
+          },
+          {
+            id: 'password',
+            value: password,
+          },
+        ],
+      }),
+    );
 
     if (response.status === 'FIELD_ERROR') {
       response.formFields.forEach((item) => {
@@ -104,6 +118,33 @@ export const useUserStore = defineStore('user', () => {
       });
       return;
     }
+    if (response.status === 'SIGN_UP_NOT_ALLOWED') {
+      errors.value.errorMessage = 'Sign up not allowed';
+    }
+
+    await EmailVerifcation.sendVerificationEmail();
+
+    router.push('/');
+  }
+
+  async function verifyEmail(): Promise<boolean> {
+    // const response = await EmailVerifcation.verifyEmail();
+    const response = await withLoading(EmailVerifcation.verifyEmail);
+    if (response.status === 'EMAIL_VERIFICATION_INVALID_TOKEN_ERROR') {
+      errors.value.errorMessage = 'Invalid token';
+      return false;
+    }
+
+    return true;
+  }
+
+  async function withLoading<T>(fn: () => Promise<T>) {
+    loading.value = true;
+    try {
+      return await fn();
+    } finally {
+      loading.value = false;
+    }
   }
 
   return {
@@ -111,12 +152,15 @@ export const useUserStore = defineStore('user', () => {
     clearErrors,
     errors,
     hasError,
+    loading,
     loggedIn,
     login,
     logout,
     selectSocicalProvider,
+    sendVerificationEmail,
     signUp,
     user,
+    verifyEmail,
   };
 });
 
@@ -126,7 +170,7 @@ async function handleGithubSelect() {
     frontendRedirectURI: 'http://localhost:5173/auth/callback/github',
   });
 
-  router.replace(authURL);
+  window.location.assign(authURL);
 }
 
 async function handleGoogleSelect() {
@@ -135,5 +179,5 @@ async function handleGoogleSelect() {
     frontendRedirectURI: 'http://localhost:5173/auth/callback/google',
   });
 
-  router.replace(authURL);
+  window.location.assign(authURL);
 }

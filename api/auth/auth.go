@@ -2,6 +2,8 @@ package auth
 
 import (
 	"github.com/supertokens/supertokens-golang/recipe/dashboard"
+	"github.com/supertokens/supertokens-golang/recipe/emailverification"
+	"github.com/supertokens/supertokens-golang/recipe/emailverification/evmodels"
 	"github.com/supertokens/supertokens-golang/recipe/session"
 	"github.com/supertokens/supertokens-golang/recipe/thirdparty/tpmodels"
 	"github.com/supertokens/supertokens-golang/recipe/thirdpartyemailpassword"
@@ -67,6 +69,9 @@ func (a *AuthStore) GetTypeInput() supertokens.TypeInput {
 			WebsiteBasePath: &a.cfg.BasePath,
 		},
 		RecipeList: []supertokens.Recipe{
+			emailverification.Init(evmodels.TypeInput{
+				Mode: evmodels.ModeRequired,
+			}),
 			thirdpartyemailpassword.Init(&tpepmodels.TypeInput{
 				Providers: a.GetProviders(),
 			}),

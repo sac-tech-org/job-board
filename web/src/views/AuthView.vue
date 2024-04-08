@@ -48,7 +48,7 @@ function goToSignIn() {
 <template>
   <div class="flex flex-col justify-between size-full">
     <div class="my-6 mx-auto w-[420px] text-center shadow-lg bg-white rounded-xl">
-      <div v-if="hasError"
+      <div v-if="hasError && errors.errorMessage"
         class="flex justify-center items-center w-[calc(100%-24px)] bg-red-300 py-0.5 mx-auto mt-1 rounded-md border border-solid border-red-600">
         <div class="text-neutral-50">{{ errors.errorMessage }}</div>
       </div>

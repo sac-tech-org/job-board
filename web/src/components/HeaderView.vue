@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { ref, toRefs } from 'vue';
 
 import FAIcon from '@/components/FAIcon.vue';
 import PopoverMenu from '@/components/PopoverMenu.vue';
@@ -10,16 +9,17 @@ interface Props {
   loggedIn: boolean;
 }
 
-const router = useRouter();
 const menuOpen = ref(false);
-const { loggedIn } = defineProps<Props>();
-const emit = defineEmits(['openLoginModal']);
+const props = defineProps<Props>();
+const { loggedIn } = toRefs(props);
 </script>
 
 <template>
   <header class="w-dvw px-5 py-3 border-b border-slate-300 sticky top-0">
     <div class="h-10 flex justify-between items-center">
-      <h1 class="text-4xl max-h-full">Sac Tech Job Board</h1>
+      <RouterLink to="/">
+        <h1 class="text-4xl max-h-full">Sac Tech Job Board</h1>
+      </RouterLink>
       <div class="flex justify-between gap-2">
         <button v-if="loggedIn" @click="menuOpen = !menuOpen">
           <FAIcon icon="fa-regular fa-circle-user" size="2xl" />
