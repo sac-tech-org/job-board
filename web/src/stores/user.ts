@@ -17,6 +17,15 @@ export const useUserStore = defineStore('user', () => {
   const errors = ref<Errors>({ errorMessage: 'Something went wrong' });
   const loggedIn = ref(false);
 
+  async function checkSession() {
+    console.log('checking login status');
+    const exists = await Session.doesSessionExist();
+    console.log('session exists', exists);
+    if (exists) {
+      loggedIn.value = true;
+    }
+  }
+
   function clearErrors() {
     errors.value = {};
     hasError.value = false;
@@ -98,6 +107,7 @@ export const useUserStore = defineStore('user', () => {
   }
 
   return {
+    checkSession,
     clearErrors,
     errors,
     hasError,
