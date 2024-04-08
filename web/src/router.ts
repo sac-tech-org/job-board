@@ -11,7 +11,7 @@ const routes = [
   { path: '/auth', name: 'auth', component: AuthView },
   { path: '/auth/callback/:provider', name: 'authCallback', component: AuthCallbackView },
   { path: '/auth/verify-email', name: 'verifyEmail', component: EmailVerification },
-  { path: '/user/:id', name: 'userProfile', component: UserProfile },
+  { path: '/user/:username', name: 'userProfile', component: UserProfile },
 ];
 
 const router = createRouter({
