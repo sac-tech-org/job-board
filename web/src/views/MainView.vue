@@ -19,10 +19,10 @@ onMounted
   <main class="w-full min-h-0 px-7 pb-5 flex flex-col grow font-mono text-sm">
     <HeroSection />
     <ListView />
-    <div>
+    <!-- <div>
       <div class="text-left">Loading... {{ loading }}</div>
       <div class="text-left">Error: {{ error }}</div>
       <div class="text-left">Data: {{ data }}</div>
-    </div>
+    </div> -->
   </main>
 </template>

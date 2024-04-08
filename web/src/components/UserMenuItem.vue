@@ -10,8 +10,8 @@ const { icon, text } = defineProps<Props>();
 </script>
 
 <template>
-  <div class="cursor-pointer flex justify-between">
+  <div class="cursor-pointer flex justify-between items-center">
     <FAIcon :icon="icon" size="lg" />
-    <span class="text-xs">{{ text }}</span>
+    <span class="text-md">{{ text }}</span>
   </div>
 </template>
