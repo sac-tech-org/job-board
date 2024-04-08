@@ -1,11 +1,13 @@
 <script setup lang="ts">
+import { toRefs } from 'vue'
 interface Props {
-  emailError: string;
-  passwordError: string;
+  emailError?: string;
+  passwordError?: string;
   isSignIn: boolean;
 }
 
 const props = defineProps<Props>();
+const { emailError, passwordError, isSignIn } = toRefs(props)
 const emit = defineEmits(['submitForm']);
 
 const email = defineModel<string>('email', { required: true });
@@ -52,7 +54,7 @@ form {
   display: flex;
   flex-direction: column;
   padding-top: 0px;
-  padding-bottom: 34px;
+  padding-bottom: 24px;
 }
 
 .input-section-container.error {
@@ -120,5 +122,17 @@ form {
 
 .button:hover {
   filter: brightness(0.95);
+}
+
+.input-error {
+  padding-top: 5px;
+  padding-bottom: 5px;
+  color: rgb(255, 23, 23);
+  line-height: 24px;
+  font-weight: 400;
+  font-size: 14px;
+  text-align: left;
+  animation: slideTop 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) 0s 1 normal both;
+  max-width: 330px;
 }
 </style>
