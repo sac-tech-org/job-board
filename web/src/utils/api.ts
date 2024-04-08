@@ -11,8 +11,9 @@ export interface HealthCheckResponse {
 
 export function useAPI<T>() {
   const data = ref<APIResponse<T>>();
-  const error = ref<any | null>(null);
+  const error = ref<any>(null);
   const execute = async () => {
+    error.value = null;
     loading.value = true;
 
     try {
@@ -21,9 +22,9 @@ export function useAPI<T>() {
 
       data.value = js;
       error.value = null;
-      loading.value = false;
     } catch (e) {
       error.value = e;
+    } finally {
       loading.value = false;
     }
   };

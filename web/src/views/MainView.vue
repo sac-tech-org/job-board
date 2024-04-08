@@ -20,9 +20,9 @@ onMounted
     <HeroSection />
     <ListView />
     <div>
-      <div class="text-center">Loading... {{ loading }}</div>
-      <div class="text-center">Error: {{ error }}</div>
-      <div class="text-center">Data: {{ data }}</div>
+      <div class="text-left">Loading... {{ loading }}</div>
+      <div class="text-left">Error: {{ error }}</div>
+      <div class="text-left">Data: {{ data }}</div>
     </div>
   </main>
 </template>
