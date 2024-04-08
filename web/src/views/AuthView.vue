@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { ref } from 'vue';
+import { storeToRefs } from 'pinia';
 import { useUserStore } from '@/stores/user';
 
 import AuthForm from '@/components/AuthForm.vue';
 import AuthProviderButton from '@/components/AuthProviderButton.vue';
 import DividerContainer from '@/components/DividerContainer.vue';
 import DividerLine from '@/components/DividerLine.vue';
-import { storeToRefs } from 'pinia';
 
 const userStore = useUserStore();
 const isSignIn = ref(true);
@@ -21,6 +21,7 @@ const providers: { name: 'GitHub' | 'Google', color: string, }[] = [
 ]
 
 async function handleSubmit() {
+  userStore.clearErrors();
   if (isSignIn.value) {
     await userStore.login(email.value, password.value);
   } else {
@@ -42,9 +43,6 @@ function goToSignIn() {
   isSignIn.value = true;
 }
 
-function validateEmail(email: string): boolean {
-  return email.includes('@');
-}
 </script>
 
 <template>
@@ -91,5 +89,4 @@ function validateEmail(email: string): boolean {
       <div class="mb-2" />
     </div>
   </div>
-
 </template>
