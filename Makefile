@@ -1,6 +1,9 @@
 dev:
 	make -j docker-up api-start web-start
 
+dev-h:
+	make -j docker-up api-start web-start-h
+
 docker-up:
 	docker compose up -d
 
@@ -18,3 +21,6 @@ web-setup:
 
 web-start:
 	cd web && npm run dev
+
+web-start-h:
+	cd web && npm run dev:host

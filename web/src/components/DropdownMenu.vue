@@ -7,7 +7,7 @@ const { open } = defineProps<Props>();
 </script>
 
 <template>
-  <dialog :open class="relative">
+  <div class="absolute right-0 z-10 shadow-lg" v-bind:class="open ? 'block' : 'hidden'">
     <slot></slot>
-  </dialog>
+  </div>
 </template>
