@@ -1,9 +1,16 @@
-import { computed, ref } from 'vue';
 import router from '@/router';
 import { defineStore } from 'pinia';
 import { type User } from '../types';
+import { computed, ref, watch } from 'vue';
 import Session from 'supertokens-web-js/recipe/session';
 import EmailVerifcation from 'supertokens-web-js/recipe/emailverification';
+import {
+  useAPI,
+  UserGetCurrentConfig,
+  UserPutConfig,
+  type UserGetResponse,
+  type UserPutRequest,
+} from '@/utils/api';
 import ThirdPartyEmailPassword from 'supertokens-web-js/recipe/thirdpartyemailpassword';
 
 interface Errors {
@@ -13,7 +20,7 @@ interface Errors {
 }
 
 export const useUserStore = defineStore('user', () => {
-  const user = ref<User | null>(null);
+  const user = ref<User | undefined>(undefined);
   const errors = ref<Errors>({});
   const loading = ref(false);
   const loggedIn = ref(false);
@@ -33,6 +40,34 @@ export const useUserStore = defineStore('user', () => {
 
   function clearErrors() {
     errors.value = {};
+  }
+
+  async function getUser() {
+    const api = useAPI<UserGetResponse, UserGetResponse>(UserGetCurrentConfig);
+    const { data, error } = api;
+
+    watch(data, (val) => {
+      user.value = val?.data;
+    });
+    watch(error, (val) => {
+      errors.value.errorMessage = val?.error;
+    });
+
+    await withLoading(() => api.execute({}));
+  }
+
+  async function updateUser(request: UserPutRequest) {
+    const api = useAPI<UserGetResponse, UserGetResponse>(UserPutConfig);
+    const { data, error } = api;
+
+    watch(data, (val) => {
+      user.value = val?.data;
+    });
+    watch(error, (val) => {
+      errors.value.errorMessage = val?.error;
+    });
+
+    await withLoading(() => api.execute(request));
   }
 
   async function login(email: string, password: string) {
@@ -68,7 +103,7 @@ export const useUserStore = defineStore('user', () => {
 
   async function logout() {
     await Session.signOut();
-    user.value = null;
+    user.value = undefined;
     loggedIn.value = false;
     clearErrors();
   }
@@ -88,7 +123,14 @@ export const useUserStore = defineStore('user', () => {
     }
   }
 
-  async function signUp(email: string, password: string) {
+  async function signUp(
+    email: string,
+    firstName: string,
+    lastName: string,
+    password: string,
+    username: string,
+  ) {
+    console.log(email, firstName, lastName, password, username);
     const response = await withLoading(() =>
       ThirdPartyEmailPassword.emailPasswordSignUp({
         formFields: [
@@ -101,6 +143,11 @@ export const useUserStore = defineStore('user', () => {
             value: password,
           },
         ],
+        userContext: {
+          firstName,
+          lastName,
+          username,
+        },
       }),
     );
 
@@ -151,6 +198,7 @@ export const useUserStore = defineStore('user', () => {
     checkSession,
     clearErrors,
     errors,
+    getUser,
     hasError,
     loading,
     loggedIn,
@@ -159,6 +207,7 @@ export const useUserStore = defineStore('user', () => {
     selectSocicalProvider,
     sendVerificationEmail,
     signUp,
+    updateUser,
     user,
     verifyEmail,
   };

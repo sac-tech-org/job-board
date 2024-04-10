@@ -10,11 +10,11 @@ import (
 type mockUserGetter struct {
 	server.DataStore
 
-	user server.User
+	user server.UserMetadata
 	err  error
 }
 
-func (m mockUserGetter) GetUser(context.Context, server.GetUserInput) (server.User, error) {
+func (m mockUserGetter) GetUser(context.Context, server.GetUserInput) (server.UserMetadata, error) {
 	return m.user, m.err
 }
 

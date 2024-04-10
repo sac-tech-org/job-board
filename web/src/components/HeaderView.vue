@@ -1,17 +1,26 @@
 <script setup lang="ts">
-import { ref, toRefs } from 'vue';
+import { onMounted, ref, toRefs, watch } from 'vue';
+import { useUserStore } from '@/stores/user'
 
 import FAIcon from '@/components/FAIcon.vue';
 import DropdownMenu from '@/components/DropdownMenu.vue';
 import UserMenu from '@/components/UserMenu.vue';
 
-interface Props {
-  loggedIn: boolean;
-}
+const userStore = useUserStore()
+const { getUser } = userStore;
+const { loggedIn, user } = toRefs(userStore)
+
+watch(loggedIn, (val) => {
+  if (val) getUser()
+})
 
 const menuOpen = ref(false);
-const props = defineProps<Props>();
-const { loggedIn } = toRefs(props);
+
+onMounted(() => {
+  if (loggedIn.value) {
+    getUser()
+  }
+})
 </script>
 
 <template>
@@ -26,7 +35,7 @@ const { loggedIn } = toRefs(props);
             <FAIcon icon="fa-regular fa-circle-user" size="2xl" />
           </button>
           <DropdownMenu :open="menuOpen">
-            <UserMenu @close-menu="menuOpen = false" />
+            <UserMenu @close-menu="menuOpen = false" :username="user?.username || 'me'" />
           </DropdownMenu>
         </div>
         <button v-else @click="$router.push('/auth')">

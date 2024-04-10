@@ -2,8 +2,6 @@ package server
 
 import (
 	"encoding/json"
-	"errors"
-	"log"
 	"net/http"
 )
 
@@ -12,15 +10,27 @@ type (
 		ID string `json:"id"`
 	}
 
+	Email struct {
+		Address  string `json:"address"`
+		Verified bool   `json:"verified"`
+	}
+
 	GetUserInput struct {
 		ID string `json:"id"`
+	}
+
+	UserResource struct {
+		Email     Email  `json:"email"`
+		FirstName string `json:"firstName"`
+		LastName  string `json:"lastName"`
+		Username  string `json:"username"`
 	}
 
 	GetUserListInput struct{}
 
 	PostUserInput struct {
-		Email     string `json:"email"`
 		FirstName string `json:"firstName"`
+		ID        string `json:"id"`
 		LastName  string `json:"lastName"`
 		Username  string `json:"username"`
 	}
@@ -31,18 +41,15 @@ type (
 		Username  string `json:"username,omitempty"`
 	}
 
-	User struct {
-		Email     string `json:"email"`
-		FirstName string `json:"firstName"`
-		LastName  string `json:"lastName"`
-		ID        string `json:"uuid"`
-		Username  string `json:"username"`
+	UserIdentity struct {
+		Email Email
+		ID    string
 	}
 
 	UserMetadata struct {
-		FirstName string `json:"firstName"`
-		LastName  string `json:"lastName"`
-		Username  string `json:"username"`
+		FirstName string
+		LastName  string
+		Username  string
 	}
 )
 
@@ -60,23 +67,34 @@ func (s *Server) handleDeleteUser(w http.ResponseWriter, r *http.Request) {
 	respond(w, r, nil, nil, http.StatusNoContent)
 }
 
-func (s *Server) handleGetUser(w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleGetCurrentUser(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	id := *ContextValue[string](ctx, userIDCTXKey)
 
-	out, err := s.userStore.GetMetadata(id)
+	ui, err := s.idStore.GetUser(id)
 	if err != nil {
-		if errors.Is(err, UserNotFound) {
-			respond(w, r, nil, UserNotFound, 0)
-			return
-		}
-
-		respond(w, r, nil, HTTPError{status: http.StatusInternalServerError, message: err.Error()}, 0)
+		respond(w, r, nil, err, 0)
 		return
+	}
+
+	um, err := s.dataStore.GetUser(ctx, GetUserInput{ID: ui.ID})
+	if err != nil {
+		hErr := HTTPError{http.StatusInternalServerError, "error getting user: " + err.Error()}
+		respond(w, r, nil, hErr, 0)
+		return
+	}
+
+	out := UserResource{
+		Email:     ui.Email,
+		FirstName: um.FirstName,
+		LastName:  um.LastName,
+		Username:  um.Username,
 	}
 
 	respond(w, r, out, nil, http.StatusOK)
 }
+
+func (s *Server) handleGetUser(w http.ResponseWriter, r *http.Request) {}
 
 func (s *Server) handleGetUserList(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
@@ -91,6 +109,8 @@ func (s *Server) handleGetUserList(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) handlePostUser(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
 	var in PostUserInput
 	if err := json.NewDecoder(r.Body).Decode(&in); err != nil {
 		hErr := HTTPError{http.StatusUnprocessableEntity, "invalid JSON"}
@@ -98,19 +118,25 @@ func (s *Server) handlePostUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ctx := r.Context()
-
-	out, err := s.dataStore.PostUser(ctx, in)
-	if err != nil {
-		log.Printf("err: %v\n", err)
-		respond(w, r, nil, HTTPError{status: http.StatusInternalServerError, message: err.Error()}, 0)
+	if err := s.dataStore.CreateUser(ctx, in); err != nil {
+		hErr := HTTPError{http.StatusInternalServerError, "error creating user: " + err.Error()}
+		respond(w, r, nil, hErr, 0)
 		return
+	}
+
+	out := UserResource{
+		FirstName: in.FirstName,
+		LastName:  in.LastName,
+		Username:  in.Username,
 	}
 
 	respond(w, r, out, nil, http.StatusCreated)
 }
 
 func (s *Server) handlePutUser(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+	id := *ContextValue[string](ctx, userIDCTXKey)
+
 	var in PutUserInput
 	if err := json.NewDecoder(r.Body).Decode(&in); err != nil {
 		hErr := HTTPError{http.StatusUnprocessableEntity, "invalid JSON"}
@@ -118,13 +144,17 @@ func (s *Server) handlePutUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ctx := r.Context()
-	id := *ContextValue[string](ctx, userIDCTXKey)
-
-	out, err := s.userStore.UpdateMetadata(id, UserMetadata(in))
+	ui, err := s.idStore.GetUser(id)
 	if err != nil {
 		respond(w, r, nil, err, 0)
 		return
+	}
+
+	out := UserResource{
+		Email:     ui.Email,
+		FirstName: in.FirstName,
+		LastName:  in.LastName,
+		Username:  in.Username,
 	}
 
 	respond(w, r, out, nil, http.StatusOK)

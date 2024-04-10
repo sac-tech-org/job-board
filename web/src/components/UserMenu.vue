@@ -3,6 +3,14 @@ import { useRouter } from 'vue-router';
 import { useUserStore } from '@/stores/user';
 
 import UserMenuItem from '@/components/UserMenuItem.vue';
+import { toRefs } from 'vue';
+
+interface Props {
+  username: string;
+}
+
+const props = defineProps<Props>();
+const { username } = toRefs(props)
 
 const router = useRouter();
 const userStore = useUserStore();
@@ -15,7 +23,7 @@ function clickAndClose(fn: () => any) {
 }
 
 function goToProfile() {
-  router.push('/user/1');
+  router.push('/user/' + username.value);
 }
 
 </script>

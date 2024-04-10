@@ -36,3 +36,7 @@ classDiagram
 ### OpenAPI
 
 The OpenAPI spec is in [openapi.yaml](./openapi.yaml), and should be kept up to date with any changes made to the API.
+
+## User Management
+
+User creation, authentication, and basic metadata is handled by [SuperTokens](https://supertokens.com)

@@ -21,23 +21,22 @@ type AuthStore interface {
 }
 
 type DataStore interface {
+	CreateUser(context.Context, PostUserInput) error
 	DeleteUser(context.Context, DeleteUserInput) error
-	GetUser(context.Context, GetUserInput) (User, error)
-	GetUserList(context.Context, GetUserListInput) ([]User, error)
-	PostUser(context.Context, PostUserInput) (User, error)
-	PutUser(context.Context, PutUserInput) (User, error)
+	GetUser(context.Context, GetUserInput) (UserMetadata, error)
+	GetUserList(context.Context, GetUserListInput) ([]UserMetadata, error)
+	PutUser(context.Context, PutUserInput) (UserMetadata, error)
 }
 
-type UserStore interface {
-	GetMetadata(string) (UserMetadata, error)
-	UpdateMetadata(string, UserMetadata) (UserMetadata, error)
+type IdentityStore interface {
+	GetUser(string) (UserIdentity, error)
 }
 
 type Server struct {
 	authStore AuthStore
 	dataStore DataStore
+	idStore   IdentityStore
 	router    http.Handler
-	userStore UserStore
 }
 
 type HTTPError struct {
@@ -96,27 +95,28 @@ func (s *Server) routes() {
 		json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
 	})
 
-	r.Route("/user", func(userRoute chi.Router) {
-		userRoute.Get("/", s.handleGetUserList)
-		userRoute.Post("/", s.handlePostUser)
+	r.Route("/user", func(r chi.Router) {
+		r.Get("/", s.handleGetUserList)
+		r.Post("/", s.handlePostUser)
 
-		userRoute.Route("/{id}", func(userIDRoute chi.Router) {
-			// userIDRoute.Use(withUserSession)
-			userIDRoute.Use(withUserID)
-			userIDRoute.Delete("/", s.handleDeleteUser)
-			userIDRoute.Get("/", s.handleGetUser)
-			userIDRoute.Put("/", s.handlePutUser)
+		r.With(withUserSession(true)).Get("/me", s.handleGetCurrentUser)
+
+		r.Route("/{username}", func(r chi.Router) {
+			r.Use(withUserSession(false))
+			r.Delete("/", s.handleDeleteUser)
+			r.Get("/", s.handleGetUser)
+			r.Put("/", s.handlePutUser)
 		})
 	})
 
 	s.router = r
 }
 
-func NewServer(a AuthStore, d DataStore, u UserStore) (Server, error) {
+func NewServer(a AuthStore, d DataStore, i IdentityStore) (Server, error) {
 	s := Server{
 		authStore: a,
 		dataStore: d,
-		userStore: u,
+		idStore:   i,
 	}
 
 	if err := s.superTokenInit(); err != nil {
