@@ -70,3 +70,20 @@ func (c *Client) QueryUserByID(ctx context.Context, id string) (datastore.User, 
 		ID:        user.UUID,
 	}, nil
 }
+
+func (c *Client) UsernameExists(ctx context.Context, username string) (bool, error) {
+	query := `
+		SELECT EXISTS(
+			SELECT 1
+			FROM users.user
+			WHERE username = $1
+		)
+	`
+
+	var exists bool
+	if err := c.db.QueryRow(ctx, query, username).Scan(&exists); err != nil {
+		return false, fmt.Errorf("error checking if username exists: %w", err)
+	}
+
+	return exists, nil
+}
