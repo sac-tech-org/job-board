@@ -29,6 +29,16 @@ export const useUserStore = defineStore('user', () => {
     return !!errors.value.errorMessage || !!errors.value.emailError || !!errors.value.passwordError;
   });
 
+  async function checkEmailVerification() {
+    const res = await withLoading(EmailVerifcation.isEmailVerified);
+    if (res.status === 'OK') {
+      return res.isVerified;
+    }
+
+    errors.value.errorMessage = 'Something went wrong while checking email verificaiton.';
+    return false;
+  }
+
   async function checkSession() {
     console.log('checking login status');
     const exists = await Session.doesSessionExist();
@@ -54,20 +64,6 @@ export const useUserStore = defineStore('user', () => {
     });
 
     await withLoading(() => api.execute({}));
-  }
-
-  async function updateUser(request: UserPutRequest) {
-    const api = useAPI<UserGetResponse, UserGetResponse>(UserPutConfig);
-    const { data, error } = api;
-
-    watch(data, (val) => {
-      user.value = val?.data;
-    });
-    watch(error, (val) => {
-      errors.value.errorMessage = val?.error;
-    });
-
-    await withLoading(() => api.execute(request));
   }
 
   async function login(email: string, password: string) {
@@ -130,7 +126,6 @@ export const useUserStore = defineStore('user', () => {
     password: string,
     username: string,
   ) {
-    console.log(email, firstName, lastName, password, username);
     const response = await withLoading(() =>
       ThirdPartyEmailPassword.emailPasswordSignUp({
         formFields: [
@@ -197,11 +192,24 @@ export const useUserStore = defineStore('user', () => {
 
     await EmailVerifcation.sendVerificationEmail();
 
-    router.push('/');
+    router.push({ name: 'verifyEmail' });
+  }
+
+  async function updateUser(request: UserPutRequest) {
+    const api = useAPI<UserGetResponse, UserGetResponse>(UserPutConfig);
+    const { data, error } = api;
+
+    watch(data, (val) => {
+      user.value = val?.data;
+    });
+    watch(error, (val) => {
+      errors.value.errorMessage = val?.error;
+    });
+
+    await withLoading(() => api.execute(request));
   }
 
   async function verifyEmail(): Promise<boolean> {
-    // const response = await EmailVerifcation.verifyEmail();
     const response = await withLoading(EmailVerifcation.verifyEmail);
     if (response.status === 'EMAIL_VERIFICATION_INVALID_TOKEN_ERROR') {
       errors.value.errorMessage = 'Invalid token';
@@ -221,6 +229,7 @@ export const useUserStore = defineStore('user', () => {
   }
 
   return {
+    checkEmailVerification,
     checkSession,
     clearErrors,
     errors,
