@@ -31,7 +31,7 @@ async function updateUser() {
       }
     }
   }
-  console.log('req:', req)
+
   await userStore.updateUser(req)
 }
 

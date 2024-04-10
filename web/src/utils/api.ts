@@ -109,7 +109,6 @@ export function useAPI<T, Out extends JSONCompatible<T>>(ec: EndpointConfig) {
     loading.value = true;
 
     const path = 'http://localhost:8080' + getPathWithQuery(ec.path, rc.params || {});
-    console.log('body', JSON.stringify(rc.body));
     const req = new Request(path, {
       method: ec.method,
       body: rc.body ? JSON.stringify(rc.body) : undefined,
