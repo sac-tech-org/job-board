@@ -143,6 +143,32 @@ export const useUserStore = defineStore('user', () => {
             value: password,
           },
         ],
+        options: {
+          preAPIHook: async (input) => {
+            // We add our own userContext object to the request body so the backend can use the
+            // values to check for duplicate usernames, and then create a database record for the user.
+            let requestInit = input.requestInit;
+
+            const body = {
+              ...JSON.parse(requestInit.body as string),
+              userContext: {
+                firstName,
+                lastName,
+                username,
+              },
+            };
+
+            requestInit = {
+              ...requestInit,
+              body: JSON.stringify(body),
+            };
+
+            return {
+              url: input.url,
+              requestInit,
+            };
+          },
+        },
         userContext: {
           firstName,
           lastName,

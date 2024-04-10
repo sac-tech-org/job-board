@@ -20,56 +20,7 @@ SuperTokens.init({
   },
   recipeList: [
     Session.init(),
-    ThirdPartyEmailPassword.init({
-      override: {
-        functions: (o) => {
-          return {
-            ...o,
-            emailPasswordSignUp: async function (input) {
-              const user = await o.emailPasswordSignUp(input);
-              if (user.status === 'OK') {
-                const { error, execute } = api;
-                const req: UserPostRequest = {
-                  body: {
-                    firstName: input.userContext.firstName || '',
-                    id: user.user.id,
-                    lastName: input.userContext.lastName || '',
-                    username: input.userContext.username || '',
-                  },
-                };
-                await execute(req);
-                if (error.value) {
-                  console.error('Error creating user', error.value);
-                }
-              }
-
-              return user;
-            },
-            thirdPartySignInAndUp: async function (input) {
-              const user = await o.thirdPartySignInAndUp(input);
-
-              if (user.status === 'OK') {
-                const { error, execute } = api;
-                const req: UserPostRequest = {
-                  body: {
-                    firstName: input.userContext?.firstName || '',
-                    id: user.user.id,
-                    lastName: input.userContext?.lastName || '',
-                    username: input.userContext?.username || '',
-                  },
-                };
-                await execute(req);
-                if (error.value) {
-                  console.error('Error creating user', error.value);
-                }
-              }
-
-              return user;
-            },
-          };
-        },
-      },
-    }),
+    ThirdPartyEmailPassword.init(),
     EmailVerifcation.init(),
   ],
 });

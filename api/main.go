@@ -18,15 +18,7 @@ import (
 )
 
 func main() {
-	// setup auth store
-	authCfg, err := getAuthConfig()
-	if err != nil {
-		log.Fatalf("error getting auth config: %v", err)
-	}
-	socCFG := getSocialConfigs()
-	a := auth.NewAuthStore(authCfg, socCFG)
-
-	// setup data store
+	// setup db connection
 	dsn, err := getDBConfig()
 	if err != nil {
 		log.Fatalf("error getting dsn: %v", err)
@@ -37,6 +29,15 @@ func main() {
 	}
 	defer db.Close()
 
+	// setup auth store
+	authCfg, err := getAuthConfig()
+	if err != nil {
+		log.Fatalf("error getting auth config: %v", err)
+	}
+	socCFG := getSocialConfigs()
+	a := auth.NewAuthStore(authCfg, &db, socCFG)
+
+	// setup data store
 	d := datastore.NewDataStore(&db)
 
 	// setup user store
