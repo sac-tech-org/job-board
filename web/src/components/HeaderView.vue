@@ -24,10 +24,10 @@ onMounted(() => {
 </script>
 
 <template>
-  <header class="w-full px-1 py-2 border-b border-slate-300 sticky top-0">
+  <header class="w-full p-3 border-b border-slate-300 sticky top-0 bg-sactech-green text-white">
     <div class="h-10 flex justify-between items-center">
       <RouterLink to="/">
-        <h1 class="text-xl md:text-4xl max-h-full">Sac Tech Job Board</h1>
+        <h1 class="text-xl md:text-4xl max-h-full">#sactech jobs</h1>
       </RouterLink>
       <div class="flex justify-between gap-2">
         <div v-if="loggedIn">
