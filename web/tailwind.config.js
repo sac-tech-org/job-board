@@ -11,4 +11,10 @@ export default {
   plugins: [
     require('@tailwindcss/forms')
   ],
+  safelist: [
+    // for the Button component
+    'bg-green-500',
+    'hover:bg-green-500/90',
+    'text-zinc-50',
+  ]
 };
