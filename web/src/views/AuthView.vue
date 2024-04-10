@@ -11,7 +11,10 @@ import DividerLine from '@/components/DividerLine.vue';
 const userStore = useUserStore();
 const isSignIn = ref(true);
 const email = ref('');
+const firstName = ref('');
+const lastName = ref('');
 const password = ref('');
+const username = ref('');
 
 const { errors, hasError } = storeToRefs(userStore);
 
@@ -25,7 +28,7 @@ async function handleSubmit() {
   if (isSignIn.value) {
     await userStore.login(email.value, password.value);
   } else {
-    await userStore.signUp(email.value, password.value);
+    await userStore.signUp(email.value, firstName.value, lastName.value, password.value, username.value);
   }
 }
 
@@ -78,7 +81,8 @@ function goToSignIn() {
           <DividerLine />
         </DividerContainer>
 
-        <AuthForm v-model:email="email" v-model:password="password" :emailError="errors.emailError"
+        <AuthForm v-model:email="email" v-model:firstName="firstName" v-model:lastName="lastName"
+          v-model:password="password" v-model:username="username" :emailError="errors.emailError"
           :passwordError="errors.passwordError" :isSignIn="isSignIn" @submitForm="handleSubmit()" />
       </div>
 

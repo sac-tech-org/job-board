@@ -11,8 +11,8 @@ import (
 	"github.com/rusher2004/job-board/api/auth"
 	"github.com/rusher2004/job-board/api/datastore"
 	"github.com/rusher2004/job-board/api/db"
+	"github.com/rusher2004/job-board/api/identity"
 	"github.com/rusher2004/job-board/api/server"
-	"github.com/rusher2004/job-board/api/userstore"
 
 	_ "github.com/lib/pq"
 )
@@ -40,9 +40,9 @@ func main() {
 	d := datastore.NewDataStore(&db)
 
 	// setup user store
-	u := userstore.NewUserStore()
+	i := identity.NewIdentityStore()
 
-	s, err := server.NewServer(&a, d, u)
+	s, err := server.NewServer(&a, d, i)
 	if err != nil {
 		log.Fatal(err)
 	}

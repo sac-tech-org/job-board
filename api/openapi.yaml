@@ -5,18 +5,32 @@ info:
   version: 0.1.0
   description: OpenAPI specification for the Sac Tech Job Board API.
   contact:
-    name: rusher
-    url: https://github.com/rusher2004/job-board/api
-    email: robertinthecloud@icloud.com
+    name: Robert Usher
+    url: https://github.com/sac-tech-org/job-board
+    email: robert@procyoninnovations.com
 
 servers:
   - url: http://localhost:8080
     description: Local server
 
 tags:
+  - name: Health Check
   - name: User
 
 paths:
+  /health:
+    get:
+      description: Health check endpoint
+      responses:
+        "200":
+          description: "Service is healthy"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthCheck"
+      tags:
+        - Health Check
+
   /user:
     get:
       operationId: getUserList
@@ -33,43 +47,23 @@ paths:
       tags:
         - User
 
-    post:
-      operationId: postUser
-      description: Create a new user
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/UserUpdatePayload"
-        required: true
+  /user/me:
+    get:
+      operationId: getCurrentUser
+      description: Get current user
       responses:
         "200":
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/UserObject"
-          description: POST User object response
-          links:
-            GetUserByID:
-              operationId: getUserByID
-              parameters:
-                id: "$response.body#/id"
-              description: \
-                The `id` value returned in the response as the `id` parameter in
-                `GET /user/{id}`
+          description: GET User object response
       tags:
         - User
 
-  /user/{user_id}:
+  /user/{username}:
     parameters:
-      - $ref: "#/components/parameters/userIDPath"
-      - description: User ID
-        in: path
-        name: id
-        required: true
-        schema:
-          type: string
-          format: uuid
+      - $ref: "#/components/parameters/usernamePath"
     delete:
       operationId: deleteUserByID
       description: Delete user by ID
@@ -79,8 +73,8 @@ paths:
       tags:
         - User
     get:
-      operationId: getUserByID
-      description: Get user by ID
+      operationId: getUserByUsername
+      description: Get user by Username
       responses:
         "200":
           content:
@@ -111,22 +105,35 @@ paths:
 
 components:
   parameters:
-    userIDPath:
+    usernamePath:
+      description: Username
       in: path
-      name: user id
+      name: username
       required: true
       schema:
         type: string
-        format: uuid
-        description: Processor name
 
   schemas:
+    EmailObject:
+      type: object
+      properties:
+        address:
+          type: string
+          format: email
+        verified:
+          type: boolean
+    HealthCheck:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+            - ok
     UserObject:
       type: object
       properties:
         email:
-          type: string
-          format: email
+          $ref: "#/components/schemas/EmailObject"
         id:
           type: string
           format: uuid
@@ -134,16 +141,16 @@ components:
           type: string
         lastName:
           type: string
+        username:
+          type: string
+          maxLength: 24
     UserUpdatePayload:
       type: object
       properties:
-        email:
-          type: string
-          format: email
         firstName:
           type: string
         lastName:
           type: string
         username:
           type: string
-          maxLength: 16
+          maxLength: 24

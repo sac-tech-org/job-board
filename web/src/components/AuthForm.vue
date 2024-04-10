@@ -11,7 +11,10 @@ const { emailError, passwordError, isSignIn } = toRefs(props)
 const emit = defineEmits(['submitForm']);
 
 const email = defineModel<string>('email', { required: true });
+const firstName = defineModel<string>('firstName', { required: true });
+const lastName = defineModel<string>('lastName', { required: true });
 const password = defineModel<string>('password', { required: true });
+const username = defineModel<string>('username', { required: true });
 </script>
 
 <template>
@@ -21,10 +24,39 @@ const password = defineModel<string>('password', { required: true });
       <div class="input-container">
         <div class="input-wrapper" v-bind:class="emailError ? 'error' : ''">
           <input autocomplete="email" class="input" type="email" name="email" placeholder="Email address"
-            v-model="email" />
+            v-model="email" required />
         </div>
       </div>
       <div v-if="emailError" class="input-error">{{ `${emailError}` }}</div>
+    </div>
+
+    <div v-if="!isSignIn">
+      <div class="input-section-container">
+        <div class="input-label">First Name</div>
+        <div class="input-container">
+          <div class="input-wrapper">
+            <input class="input" type="text" name="firstName" placeholder="First Name" v-model="firstName" required />
+          </div>
+        </div>
+      </div>
+
+      <div class="input-section-container">
+        <div class="input-label">Last Name</div>
+        <div class="input-container">
+          <div class="input-wrapper">
+            <input class="input" type="text" name="lastName" placeholder="Last Name" v-model="lastName" required />
+          </div>
+        </div>
+      </div>
+
+      <div class="input-section-container">
+        <div class="input-label">Username</div>
+        <div class="input-container">
+          <div class="input-wrapper">
+            <input class="input" type="text" name="username" placeholder="Username" v-model="username" required />
+          </div>
+        </div>
+      </div>
     </div>
 
     <div class="input-section-container" v-bind:class="passwordError ? 'error' : ''">
@@ -32,7 +64,7 @@ const password = defineModel<string>('password', { required: true });
       <div class="input-container">
         <div class="input-wrapper" v-bind:class="passwordError ? 'error' : ''">
           <input autocomplete="current-password" class="input" type="password" name="password" placeholder="Password"
-            v-model="password" />
+            v-model="password" required />
         </div>
       </div>
       <div v-if="passwordError" class="input-error">{{ `${passwordError}` }}</div>
