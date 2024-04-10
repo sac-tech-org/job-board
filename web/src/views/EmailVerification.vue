@@ -79,7 +79,7 @@ onBeforeUnmount(() => {
                   'Need a new verification email? Login to send a new one.' }}
               </div>
             </div>
-            <Button @click="router.push({ name: 'auth' })" bgColor="red-500" textColor="slate-50">Login</Button>
+            <Button @click="router.push({ name: 'auth' })">Login</Button>
           </div>
 
         </template>

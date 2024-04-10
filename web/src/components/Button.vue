@@ -34,7 +34,6 @@ const classes = computed(() => {
     out[`text-${textColor.value}`] = true
   }
 
-  console.log('out', out)
   return out
 })
 </script>
