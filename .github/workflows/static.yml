@@ -35,4 +35,4 @@ jobs:
           git config user.name github-actions
           git config user.email github-actions@github.com
           git commit -m 'adding web/dist to subtree'
-          git subtree push --prefix web/dist origin gh-pages
+          git subtree push --prefix web/dist origin gh-pages/devops-web
