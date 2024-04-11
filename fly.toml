@@ -1,37 +1,38 @@
-# fly.toml app configuration file generated for sac-tech-job-board-api-dev on 2024-04-11T08:59:43-07:00
+# fly.toml app configuration file generated for sac-tech-job-board-api on 2024-04-11T16:37:12-07:00
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = 'sac-tech-job-board-api-dev'
+app = 'sac-tech-job-board-api'
 primary_region = 'sjc'
 
 [build]
-dockerfile = "./api/Dockerfile"
+  dockerfile = './api/Dockerfile'
 
 [http_service]
-internal_port = 8080
-force_https = true
-auto_stop_machines = true
-auto_start_machines = true
-min_machines_running = 0
-processes = ['app']
-[http_service.concurrency]
-type = "requests"
-soft_limit = 200
-hard_limit = 250
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ['app']
 
-[[vm]]
-memory = '1gb'
-cpu_kind = 'shared'
-cpus = 1
+  [http_service.concurrency]
+    type = 'requests'
+    hard_limit = 250
+    soft_limit = 200
 
 [checks]
-[checks.api_health]
-grace_period = "30s"
-interval = "15s"
-method = "get"
-path = "/health"
-port = 8080
-timeout = "2s"
-type = "http"
+  [checks.api_health]
+    port = 8080
+    type = 'http'
+    interval = '15s'
+    timeout = '2s'
+    grace_period = '30s'
+    method = 'get'
+    path = '/health'
+
+[[vm]]
+  memory = '1gb'
+  cpu_kind = 'shared'
+  cpus = 1
