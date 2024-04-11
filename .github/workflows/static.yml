@@ -1,0 +1,37 @@
+name: Deploy static content to Pages
+
+on:
+  push:
+    branches: devops-web
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+permissions:
+  contents: write
+jobs:
+  # Single deploy job since we're just deploying
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 21
+      - name: Install dependencies
+        run: npm ci
+        working-directory: ./web
+      - name: Build
+        run: npm run build
+        working-directory: ./web
+      - name: Add CNAME record
+        run: echo 'jobs.sac-tech.org' > web/dist/CNAME
+      - name: Git add
+        run: git add -f web/dist/
+      - name: Git commit
+        run: git commit -m 'adding web/dist to subtree'
+      - name: Git push
+        run: git subtree push --prefix web/dist origin gh-pages

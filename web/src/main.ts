@@ -7,10 +7,7 @@ import { useUserStore } from '@/stores/user';
 import SuperTokens from 'supertokens-web-js';
 import Session from 'supertokens-web-js/recipe/session';
 import EmailVerifcation from 'supertokens-web-js/recipe/emailverification';
-import { UserPostConfig, useAPI, type UserPostRequest } from './utils/api';
 import ThirdPartyEmailPassword from 'supertokens-web-js/recipe/thirdpartyemailpassword';
-
-const api = useAPI<UserPostRequest, UserPostRequest>(UserPostConfig);
 
 SuperTokens.init({
   appInfo: {
@@ -27,6 +24,6 @@ SuperTokens.init({
 
 const pinia = createPinia();
 const store = useUserStore(pinia);
-await store.checkSession();
+store.checkSession();
 
 createApp(App).use(pinia).use(router).mount('#app');
