@@ -50,10 +50,6 @@ func main() {
 		log.Fatal(err)
 	}
 
-	log.Println("----------------------------------")
-	log.Println("            it changed            ")
-	log.Println("----------------------------------")
-
 	log.Println("starting server on port 8080")
 	log.Fatal(http.ListenAndServe(":8080", s.Router()))
 }
