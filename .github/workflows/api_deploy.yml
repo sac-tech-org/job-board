@@ -1,10 +1,10 @@
-name: Fly Deploy
+name: API Build and Deploy
 on:
   push:
     branches:
       - devops
 jobs:
-  docker:
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -22,13 +22,13 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: ./api/Dockerfile"
+          file: ./api/Dockerfile
           push: true
           tags: procyonic/sac-tech-job-board:api
 
   deploy:
     name: Deploy API to fly.io
-    needs: docker
+    needs: build
     runs-on: ubuntu-latest
     concurrency: deploy-group # optional: ensure only one action runs at a time
     steps:
