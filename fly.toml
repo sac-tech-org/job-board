@@ -1,0 +1,37 @@
+# fly.toml app configuration file generated for sac-tech-job-board-api-dev on 2024-04-11T08:59:43-07:00
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'sac-tech-job-board-api-dev'
+primary_region = 'sjc'
+
+[build]
+dockerfile = "./api/Dockerfile"
+
+[http_service]
+internal_port = 8080
+force_https = true
+auto_stop_machines = true
+auto_start_machines = true
+min_machines_running = 0
+processes = ['app']
+[http_service.concurrency]
+type = "requests"
+soft_limit = 200
+hard_limit = 250
+
+[[vm]]
+memory = '1gb'
+cpu_kind = 'shared'
+cpus = 1
+
+[checks]
+[checks.api_health]
+grace_period = "30s"
+interval = "15s"
+method = "get"
+path = "/health"
+port = 8080
+timeout = "2s"
+type = "http"

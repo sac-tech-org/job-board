@@ -2,28 +2,27 @@ package main
 
 import (
 	"context"
-	"fmt"
+	"errors"
 	"log"
 	"net/http"
 	"os"
+	"strings"
 
-	"github.com/joho/godotenv"
+	_ "github.com/joho/godotenv/autoload"
 	"github.com/rusher2004/job-board/api/auth"
 	"github.com/rusher2004/job-board/api/datastore"
 	"github.com/rusher2004/job-board/api/db"
 	"github.com/rusher2004/job-board/api/identity"
 	"github.com/rusher2004/job-board/api/server"
-
-	_ "github.com/lib/pq"
 )
 
 func main() {
-	// setup db connection
-	dsn, err := getDBConfig()
-	if err != nil {
-		log.Fatalf("error getting dsn: %v", err)
+	dbURL, ok := os.LookupEnv("DATABASE_URL")
+	if !ok {
+		log.Fatal("DATABASE_URL is not set")
 	}
-	db, err := db.NewDB(context.Background(), dsn)
+
+	db, err := db.NewDB(context.Background(), dbURL)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -32,9 +31,12 @@ func main() {
 	// setup auth store
 	authCfg, err := getAuthConfig()
 	if err != nil {
-		log.Fatalf("error getting auth config: %v", err)
+		log.Fatal(err)
 	}
-	socCFG := getSocialConfigs()
+	socCFG, err := getSocialConfigs()
+	if err != nil {
+		log.Fatal(err)
+	}
 	a := auth.NewAuthStore(authCfg, &db, socCFG)
 
 	// setup data store
@@ -53,24 +55,40 @@ func main() {
 }
 
 func getAuthConfig() (auth.AuthConfig, error) {
-	if err := godotenv.Load(); err != nil {
-		return auth.AuthConfig{}, fmt.Errorf("error loading .env file: %w", err)
+	var envErrs []string
+	apiDomain, ok := os.LookupEnv("AUTH_API_DOMAIN")
+	if !ok {
+		envErrs = append(envErrs, "AUTH_API_DOMAIN")
+	}
+	apiKey, ok := os.LookupEnv("AUTH_API_KEY")
+	if !ok {
+		envErrs = append(envErrs, "AUTH_API_KEY")
+	}
+	appName, ok := os.LookupEnv("AUTH_APP_NAME")
+	if !ok {
+		envErrs = append(envErrs, "AUTH_APP_NAME")
+	}
+	basePath, ok := os.LookupEnv("AUTH_BASE_PATH")
+	if !ok {
+		envErrs = append(envErrs, "AUTH_BASE_PATH")
+	}
+	connURI, ok := os.LookupEnv("AUTH_CONN_URI")
+	if !ok {
+		envErrs = append(envErrs, "AUTH_CONN_URI")
+	}
+	siteDomain, ok := os.LookupEnv("AUTH_SITE_DOMAIN")
+	if !ok {
+		envErrs = append(envErrs, "AUTH_SITE_DOMAIN")
+	}
+	siteURI, ok := os.LookupEnv("AUTH_SITE_URI")
+	if !ok {
+		envErrs = append(envErrs, "AUTH_SITE_URI")
 	}
 
-	var (
-		apiDomain  = os.Getenv("AUTH_API_DOMAIN")
-		apiKey     = os.Getenv("AUTH_API_KEY")
-		appName    = os.Getenv("AUTH_APP_NAME")
-		basePath   = os.Getenv("AUTH_BASE_PATH")
-		connURI    = os.Getenv("AUTH_CONN_URI")
-		siteDomain = os.Getenv("AUTH_SITE_DOMAIN")
-		siteURI    = os.Getenv("AUTH_SITE_URI")
-	)
-
-	if apiDomain == "" || apiKey == "" || appName == "" || basePath == "" || connURI == "" || siteDomain == "" || siteURI == "" {
-		return auth.AuthConfig{}, fmt.Errorf("some auth config is missing")
+	if len(envErrs) > 0 {
+		msg := "auth env vars missing: " + strings.Join(envErrs, "; ")
+		return auth.AuthConfig{}, errors.New(msg)
 	}
-
 	return auth.AuthConfig{
 		APIDomain:  apiDomain,
 		APIKey:     apiKey,
@@ -82,44 +100,34 @@ func getAuthConfig() (auth.AuthConfig, error) {
 	}, nil
 }
 
-func getDBConfig() (db.ConnectConfig, error) {
-	if err := godotenv.Load(); err != nil {
-		return db.ConnectConfig{}, fmt.Errorf("error loading .env file: %w", err)
+func getSocialConfigs() ([]auth.SocialConfig, error) {
+	var envErrs []string
+	providers := []auth.SocialConfig{
+		{ProviderName: "github"},
+		{ProviderName: "google"},
+		{ProviderName: "linkedin"},
 	}
 
-	host := os.Getenv("POSTGRES_HOST")
-	port := os.Getenv("POSTGRES_PORT")
-	user := os.Getenv("POSTGRES_USER")
-	password := os.Getenv("POSTGRES_PASSWORD")
+	for _, p := range providers {
+		idVar := strings.ToUpper(p.ProviderName) + "_CLIENT_ID"
+		secretVar := strings.ToUpper(p.ProviderName) + "_CLIENT_SECRET"
+		clientID, ok := os.LookupEnv(idVar)
+		if !ok {
+			envErrs = append(envErrs, secretVar)
+		}
+		clientSecret, ok := os.LookupEnv(secretVar)
+		if !ok {
+			envErrs = append(envErrs, secretVar)
+		}
 
-	if host == "" || port == "" || user == "" || password == "" {
-		return db.ConnectConfig{}, fmt.Errorf("some db config is missing")
+		p.ClientID = clientID
+		p.ClientSecret = clientSecret
 	}
 
-	return db.ConnectConfig{
-		Host:     host,
-		Port:     port,
-		User:     user,
-		Password: password,
-	}, nil
-}
-
-func getSocialConfigs() []auth.SocialConfig {
-	return []auth.SocialConfig{
-		{
-			ProviderName: "github",
-			ClientID:     os.Getenv("GITHUB_CLIENT_ID"),
-			ClientSecret: os.Getenv("GITHUB_CLIENT_SECRET"),
-		},
-		{
-			ProviderName: "google",
-			ClientID:     os.Getenv("GOOGLE_CLIENT_ID"),
-			ClientSecret: os.Getenv("GOOGLE_CLIENT_SECRET"),
-		},
-		{
-			ProviderName: "linkedin",
-			ClientID:     os.Getenv("LINKEDIN_CLIENT_ID"),
-			ClientSecret: os.Getenv("LINKEDIN_CLIENT_SECRET"),
-		},
+	if len(envErrs) > 0 {
+		msg := "social env vars missing: " + strings.Join(envErrs, "; ")
+		return nil, errors.New(msg)
 	}
+
+	return providers, nil
 }

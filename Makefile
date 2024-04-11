@@ -5,7 +5,7 @@ dev-h:
 	make -j docker-up api-start web-start-h
 
 docker-up:
-	docker compose up -d
+	docker compose -p job-board up -d
 
 api-setup:
 	cd api && go mod download
