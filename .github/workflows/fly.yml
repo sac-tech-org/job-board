@@ -2,7 +2,7 @@ name: API Build and Deploy
 on:
   push:
     branches:
-      - devops
+      - main
 jobs:
   deploy:
     name: Deploy API to fly.io
