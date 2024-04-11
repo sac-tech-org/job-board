@@ -29,9 +29,10 @@ jobs:
         working-directory: ./web
       - name: Add CNAME record
         run: echo 'jobs.sac-tech.org' > web/dist/CNAME
-      - name: Git add
-        run: git add -f web/dist/
-      - name: Git commit
-        run: git commit -m 'adding web/dist to subtree'
-      - name: Git push
-        run: git subtree push --prefix web/dist origin gh-pages
+      - name: Push to gh-pages subtree
+        run: |
+          git add -f web/dist/
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git commit -m 'adding web/dist to subtree'
+          git subtree push --prefix web/dist origin gh-pages
