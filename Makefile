@@ -1,8 +1,5 @@
 dev:
-	make -j docker-up web-start
-
-dev-h:
-	make -j docker-up web-start-h
+	make -j docker-up 
 
 docker-up:
 	docker compose up -d
