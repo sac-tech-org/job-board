@@ -99,6 +99,8 @@ export interface UserPutRequest {
   };
 }
 
+const apiBase = import.meta.env.VITE_API_URL
+
 export function useAPI<T, Out extends JSONCompatible<T>>(ec: EndpointConfig) {
   const data = ref<APIResponse<Out>>();
   const error = ref<any>(null);
@@ -108,7 +110,7 @@ export function useAPI<T, Out extends JSONCompatible<T>>(ec: EndpointConfig) {
     error.value = null;
     loading.value = true;
 
-    const path = 'http://localhost:8080' + getPathWithQuery(ec.path, rc.params || {});
+    const path = apiBase + getPathWithQuery(ec.path, rc.params || {});
     const req = new Request(path, {
       method: ec.method,
       body: rc.body ? JSON.stringify(rc.body) : undefined,

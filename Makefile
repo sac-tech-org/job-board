@@ -1,11 +1,11 @@
 dev:
-	make -j docker-up api-start web-start
+	make -j docker-up web-start
 
 dev-h:
-	make -j docker-up api-start web-start-h
+	make -j docker-up web-start-h
 
 docker-up:
-	docker compose -p job-board up -d
+	docker compose up -d
 
 api-setup:
 	cd api && go mod download
