@@ -1,14 +1,30 @@
-version: '3'
+name: "sac-tech-job-board"
 
 services:
   api:
     build:
       context: .
-      dockerfile: ./api/Dockerfile
+      dockerfile: ./api/Dockerfile.local
+    container_name: api
     depends_on:
       - db
+    env_file: ./api/.env
     ports:
       - "8080:8080"
+    volumes:
+      - ./:/app
+
+  web:
+    build: ./web
+    container_name: web
+    environment:
+      - NODE_ENV=development
+    ports: 
+      - "3000:3000"
+    tty: true
+    volumes:
+      - ./web:/app
+      - /app/node_modules
 
 
 include:

@@ -251,7 +251,7 @@ export const useUserStore = defineStore('user', () => {
 async function handleGithubSelect() {
   const authURL = await ThirdPartyEmailPassword.getAuthorisationURLWithQueryParamsAndSetState({
     thirdPartyId: 'github',
-    frontendRedirectURI: 'http://localhost:5173/auth/callback/github',
+    frontendRedirectURI: import.meta.env.VITE_APP_URL + '/auth/callback/github',
   });
 
   window.location.assign(authURL);
@@ -260,7 +260,7 @@ async function handleGithubSelect() {
 async function handleGoogleSelect() {
   const authURL = await ThirdPartyEmailPassword.getAuthorisationURLWithQueryParamsAndSetState({
     thirdPartyId: 'google',
-    frontendRedirectURI: 'http://localhost:5173/auth/callback/google',
+    frontendRedirectURI: import.meta.env.VITE_APP_URL + '/auth/callback/google',
   });
 
   window.location.assign(authURL);

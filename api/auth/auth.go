@@ -89,7 +89,6 @@ func (a *AuthStore) GetTypeInput() supertokens.TypeInput {
 				Providers: a.GetProviders(),
 				Override: &tpepmodels.OverrideStruct{
 					APIs: a.apiOverrides,
-					// Functions: a.hello,
 				},
 			}),
 			session.Init(nil),
