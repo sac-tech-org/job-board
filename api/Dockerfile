@@ -7,9 +7,9 @@ COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
 
-RUN go build -C ./api -o ../server
+RUN go build -C ./api
 
 FROM scratch
-COPY --from=build /app/server /server
+COPY --from=build /app/api/api /api
 
-ENTRYPOINT ["/server"]
+ENTRYPOINT ["/api"]
