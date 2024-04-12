@@ -42,7 +42,7 @@ jobs:
         run: npm run build
         working-directory: ./web
       - name: Add CNAME record
-        run: echo 'jobs.sac-tech.org' > web/dist/CNAME
+        run: echo 'jobs.sac-tech.com' > web/dist/CNAME
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
