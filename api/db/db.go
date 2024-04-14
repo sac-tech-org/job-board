@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"net/url"
-	"strings"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -19,10 +18,8 @@ func NewDB(ctx context.Context, connString string) (Client, error) {
 		return Client{}, fmt.Errorf("error parsing db url: %w", err)
 	}
 
-	if !strings.Contains(u.String(), "/board") {
-		u = u.JoinPath("board")
-	}
-
+	// explicitly set this because fly.io create another default db
+	u.Path = "/board"
 	cfg, err := pgxpool.ParseConfig(u.String())
 	if err != nil {
 		return Client{}, fmt.Errorf("error parsing db config: %w", err)
@@ -31,6 +28,10 @@ func NewDB(ctx context.Context, connString string) (Client, error) {
 	p, err := pgxpool.NewWithConfig(ctx, cfg)
 	if err != nil {
 		return Client{}, fmt.Errorf("error creating db pool: %w", err)
+	}
+
+	if err := p.Ping(ctx); err != nil {
+		return Client{}, fmt.Errorf("error pinging db: %w", err)
 	}
 
 	return Client{p}, nil

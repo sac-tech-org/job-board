@@ -1,6 +1,9 @@
 dev:
 	make -j docker-up 
 
+dev-stop:
+	docker compose down
+
 docker-up:
 	docker compose up -d
 
