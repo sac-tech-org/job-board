@@ -46,57 +46,57 @@ CREATE OR REPLACE TRIGGER users_email_updated_trigger BEFORE
 UPDATE ON users.email FOR EACH ROW EXECUTE FUNCTION updated_timestamp();
 
 /*
- companies scema
+ organizations scema
  */
-CREATE SCHEMA IF NOT EXISTS companies;
+CREATE SCHEMA IF NOT EXISTS organizations;
 
--- company table
-CREATE TABLE IF NOT EXISTS companies.company (
-  company_id SERIAL PRIMARY KEY,
-  company_uuid UUID DEFAULT uuid_generate_v4() NOT NULL UNIQUE,
+-- organization table
+CREATE TABLE IF NOT EXISTS organizations.organization (
+  organization_id SERIAL PRIMARY KEY,
+  organization_uuid UUID DEFAULT uuid_generate_v4() NOT NULL UNIQUE,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE OR REPLACE TRIGGER companies_company_updated_trigger BEFORE
-UPDATE ON companies.company FOR EACH ROW EXECUTE FUNCTION updated_timestamp();
+CREATE OR REPLACE TRIGGER organizations_organization_updated_trigger BEFORE
+UPDATE ON organizations.organization FOR EACH ROW EXECUTE FUNCTION updated_timestamp();
 
 -- representative table
-CREATE TABLE IF NOT EXISTS companies.representative (
+CREATE TABLE IF NOT EXISTS organizations.representative (
   representative_id SERIAL PRIMARY KEY,
   representative_uuid UUID DEFAULT uuid_generate_v4() NOT NULL UNIQUE,
-  company_id INT REFERENCES companies.company(company_id) NOT NULL,
-  user_id UUID REFERENCES users.user(user_id) NOT NULL,
+  organization_id INT REFERENCES organizations.organization(organization_id) NOT NULL,
+  user_id INT REFERENCES users.user(user_id) NOT NULL,
   active BOOLEAN NOT NULL DEFAULT TRUE,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE OR REPLACE TRIGGER companies_representative_updated_trigger BEFORE
-UPDATE ON companies.representative FOR EACH ROW EXECUTE FUNCTION updated_timestamp();
+CREATE OR REPLACE TRIGGER organizations_representative_updated_trigger BEFORE
+UPDATE ON organizations.representative FOR EACH ROW EXECUTE FUNCTION updated_timestamp();
 
-ALTER TABLE companies.company
-ADD COLUMN IF NOT EXISTS created_by INT REFERENCES companies.representative(representative_id) NOT NULL,
-  ADD COLUMN IF NOT EXISTS owned_by INT REFERENCES companies.representative(representative_id) NOT NULL;
+ALTER TABLE organizations.organization
+ADD COLUMN IF NOT EXISTS created_by INT REFERENCES organizations.representative(representative_id) NOT NULL,
+  ADD COLUMN IF NOT EXISTS owned_by INT REFERENCES organizations.representative(representative_id) NOT NULL;
 
 -- email table
-CREATE TABLE IF NOT EXISTS companies.email (
+CREATE TABLE IF NOT EXISTS organizations.email (
   email_id SERIAL PRIMARY KEY,
   email_uuid UUID DEFAULT uuid_generate_v4() NOT NULL UNIQUE,
-  representative_id INT REFERENCES companies.representative(representative_id) NOT NULL,
+  representative_id INT REFERENCES organizations.representative(representative_id) NOT NULL,
   address VARCHAR(255) NOT NULL UNIQUE,
   verified BOOLEAN NOT NULL DEFAULT FALSE,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE OR REPLACE TRIGGER companies_email_updated_trigger BEFORE
-UPDATE ON companies.email FOR EACH ROW EXECUTE FUNCTION updated_timestamp();
+CREATE OR REPLACE TRIGGER organizations_email_updated_trigger BEFORE
+UPDATE ON organizations.email FOR EACH ROW EXECUTE FUNCTION updated_timestamp();
 
 -- profile table
-CREATE TABLE IF NOT EXISTS companies.profile (
+CREATE TABLE IF NOT EXISTS organizations.profile (
   profile_id SERIAL PRIMARY KEY,
-  company_id UUID REFERENCES companies.company(company_id) NOT NULL,
+  organization_id INT REFERENCES organizations.organization(organization_id) NOT NULL,
   name VARCHAR(255) NOT NULL,
   description TEXT,
   website_url VARCHAR(255),
@@ -104,15 +104,16 @@ CREATE TABLE IF NOT EXISTS companies.profile (
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE OR REPLACE TRIGGER companies_profile_updated_trigger BEFORE
-UPDATE ON companies.profile FOR EACH ROW EXECUTE FUNCTION updated_timestamp();
+CREATE OR REPLACE TRIGGER organizations_profile_updated_trigger BEFORE
+UPDATE ON organizations.profile FOR EACH ROW EXECUTE FUNCTION updated_timestamp();
 
 -- permissions table
-CREATE TABLE IF NOT EXISTS companies.permissions (
+CREATE TABLE IF NOT EXISTS organizations.permissions (
   permissions_id SERIAL PRIMARY KEY,
-  company_id UUID REFERENCES companies.company(company_id) NOT NULL,
-  user_id UUID REFERENCES users.user(user_id) NOT NULL,
+  organization_id INT REFERENCES organizations.organization(organization_id) NOT NULL,
+  user_id INT REFERENCES users.user(user_id) NOT NULL,
   update_profile BOOLEAN NOT NULL DEFAULT FALSE,
+  create_job BOOLEAN NOT NULL DEFAULT FALSE,
   post_job BOOLEAN NOT NULL DEFAULT FALSE,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -146,7 +147,7 @@ CREATE TYPE pay_type AS ENUM (
 CREATE TABLE IF NOT EXISTS jobs.job (
   job_id SERIAL PRIMARY KEY,
   job_uuid UUID DEFAULT uuid_generate_v4() NOT NULL UNIQUE,
-  company_id INT REFERENCES companies.company(company_id) NOT NULL,
+  organization_id INT REFERENCES organizations.organization(organization_id) NOT NULL,
   title VARCHAR(255) NOT NULL,
   description TEXT NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -173,7 +174,7 @@ CREATE TABLE IF NOT EXISTS jobs.job_posting (
 -- permissions table
 CREATE TABLE IF NOT EXISTS jobs.job_permissions (
   id SERIAL PRIMARY KEY,
-  job_id INT REFERENCES jobs.job(job_posting_id) NOT NULL UNIQUE,
+  job_id INT REFERENCES jobs.job(job_id) NOT NULL UNIQUE,
   user_id INT REFERENCES users.user(user_id) NOT NULL,
   update_job BOOLEAN NOT NULL DEFAULT FALSE,
   delete_job BOOLEAN NOT NULL DEFAULT FALSE,
