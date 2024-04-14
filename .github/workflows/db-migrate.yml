@@ -15,5 +15,5 @@ jobs:
       - name: Setup golang-migrate
         uses: docker://migrate/migrate:latest
         with:
-          entrypoint: migrate
+          # entrypoint: migrate
           args: up -path db/migrations
