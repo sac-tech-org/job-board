@@ -11,7 +11,7 @@ import ThirdPartyEmailPassword from 'supertokens-web-js/recipe/thirdpartyemailpa
 
 SuperTokens.init({
   appInfo: {
-    apiDomain: 'https://api.jobs.sac-tech.com',
+    apiDomain: import.meta.env.VITE_API_URL,
     apiBasePath: '/auth',
     appName: 'Sac Tech Job Board',
   },

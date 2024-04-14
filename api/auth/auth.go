@@ -136,7 +136,7 @@ func (a *AuthStore) apiOverrides(ogImplementation tpepmodels.APIInterface) tpepm
 		// here we just let supertokens to its normal thing.
 		resp, err := ogEPSignUp(formFields, tenantId, options, uc)
 		if err != nil {
-			return tpepmodels.SignUpPOSTResponse{}, err
+			return tpepmodels.SignUpPOSTResponse{}, fmt.Errorf("error calling original email password sign up: %w", err)
 		}
 
 		if resp.OK != nil {
