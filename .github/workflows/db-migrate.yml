@@ -15,5 +15,5 @@ jobs:
       - name: Setup golang-migrate
         uses: docker://migrate/migrate:latest
         with:
-          # entrypoint: migrate
-          args: up -path db/migrations
+          entrypoint: migrate
+          args: "-path=/migrations -database=postgres://${{ secrets.DB_USER }}:${{ secrets.DB_PASSWORD }}@localhost:5432/${{ secrets.DB_NAME }}?sslmode=disable up"
