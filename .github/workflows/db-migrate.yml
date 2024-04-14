@@ -1,0 +1,16 @@
+name: Migrate Database
+
+on:
+  push:
+    branches:
+      - db-migrate
+
+jobs:
+  db-migrate:
+    runs-on: ubuntu-latest
+    name: migrate
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Run Migration
+        uses: ./db
