@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 
@@ -17,12 +16,6 @@ func main() {
 		log.Fatal("POSTGRES_URL is not set")
 	}
 
-	ghFile, ok := os.LookupEnv("GITHUB_STEP_SUMMARY")
-	if !ok {
-		log.Fatal("GITHUB_STEP_SUMMARY is not set")
-	}
-
-	fmt.Printf("dbURL: %v\n", dbURL)
 	m, err := migrate.New("file://migrations", dbURL)
 	if err != nil {
 		log.Fatalf("error creating migrator: %v\n", err)
@@ -32,5 +25,5 @@ func main() {
 		log.Fatalf("error applying migrations: %v\n", err)
 	}
 
-	os.WriteFile(ghFile, []byte("migrations applied"), 0644)
+	log.Println("migrations applied")
 }

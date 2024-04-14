@@ -1,5 +1,0 @@
-name: "DB Migrate"
-description: "Run a databse migration using a binary built from golang-migrate."
-runs:
-  using: "docker"
-  image: "Dockerfile"

@@ -3,9 +3,10 @@ package db
 import (
 	"context"
 	"fmt"
+	"net/url"
+	"strings"
 
 	"github.com/jackc/pgx/v5/pgxpool"
-	_ "github.com/lib/pq"
 )
 
 type Client struct {
@@ -13,7 +14,21 @@ type Client struct {
 }
 
 func NewDB(ctx context.Context, connString string) (Client, error) {
-	p, err := pgxpool.New(ctx, connString)
+	u, err := url.Parse(connString)
+	if err != nil {
+		return Client{}, fmt.Errorf("error parsing db url: %w", err)
+	}
+
+	if !strings.Contains(u.String(), "/board") {
+		u = u.JoinPath("board")
+	}
+
+	cfg, err := pgxpool.ParseConfig(u.String())
+	if err != nil {
+		return Client{}, fmt.Errorf("error parsing db config: %w", err)
+	}
+
+	p, err := pgxpool.NewWithConfig(ctx, cfg)
 	if err != nil {
 		return Client{}, fmt.Errorf("error creating db pool: %w", err)
 	}
