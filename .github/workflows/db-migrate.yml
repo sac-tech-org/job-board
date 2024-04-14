@@ -12,5 +12,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Run Migration
-        uses: ./.github/actions/db-migrate
+      - name: Setup golang-migrate
+        uses: docker://migrate/migrate:latest
+        with:
+          entrypoint: migrate
+          args: up -path db/migrations
