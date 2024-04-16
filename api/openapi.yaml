@@ -15,6 +15,8 @@ servers:
 
 tags:
   - name: Health Check
+  - name: Job
+  - name: Organization
   - name: User
 
 paths:
@@ -31,6 +33,244 @@ paths:
       tags:
         - Health Check
 
+  /job:
+    post:
+      operationId: postJob
+      description: Create a new job
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/JobPost"
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JobResource"
+          description: "Job created"
+          links:
+            GetJobByID:
+              operationId: getJobByID
+              parameters:
+                id: "$response.body#/id"
+              description: The `id` value in the response is the `job_id` parameter in `GET /job/{job_id}`
+
+      tags:
+        - Job
+
+  /job/{job_id}:
+    parameters:
+      - name: job_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      operationId: getJobByID
+      description: Get job by ID
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JobResource"
+          description: GET Job object response
+      tags:
+        - Job
+    put:
+      operationId: putJobByID
+      description: Update job by ID
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/JobPost"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JobResource"
+          description: PUT Job object response
+      tags:
+        - Job
+
+  /job/{job_id}/posting:
+    parameters:
+      - name: job_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      operationId: getJobPosting
+      description: Get job posting by ID
+      parameters:
+        - $ref: "#/components/parameters/pageSizeQuery"
+        - $ref: "#/components/parameters/pageTokenQuery"
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/JobPostingResourceList"
+          description: GET Job posting response
+      tags:
+        - Job
+    post:
+      operationId: postJobPosting
+      description: Create a new job posting
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/JobPostingPost"
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JobPostingResource"
+          description: "Job posting created"
+          links:
+            GetJobPostingByID:
+              operationId: getJobPostingByID
+              parameters:
+                id: "$response.body#/id"
+              description: The `id` value in the response is the `posting_id` parameter in `GET /job/{job_id}/posting/{posting_id}`
+      tags:
+        - Job
+    put:
+      operationId: putJobPostingByID
+      description: Update job posting by ID
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/JobPostingPost"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JobPostingResource"
+          description: PUT Job posting object response
+      tags:
+        - Job
+
+  /job/posting:
+    get:
+      operationId: getJobPostingList
+      description: Get list of job postings
+      parameters:
+        - $ref: "#/components/parameters/pageSizeQuery"
+        - $ref: "#/components/parameters/pageTokenQuery"
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/JobPostingResourceList"
+          description: GET Job posting list response
+      tags:
+        - Job
+
+  /organization:
+    post:
+      operationId: postOrganization
+      description: Create a new organization
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OrganizationPost"
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrganizationResource"
+          description: "Organization created"
+          links:
+            GetOrgByID:
+              operationId: getOrganizationByID
+              parameters:
+                id: "$response.body#/id"
+              description: The `id` value in the response is the `org_id` parameter in `GET /organization/{org_id}`
+
+      tags:
+        - Organization
+
+  /organization/{org_id}:
+    parameters:
+      - name: org_id
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      operationId: getOrganizationByID
+      description: Get organization by ID
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrganizationResource"
+          description: GET Organization object response
+      tags:
+        - Organization
+    put:
+      operationId: putOrganizationByID
+      description: Update organization by ID
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OrganizationPost"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrganizationResource"
+          description: PUT Organization object response
+      tags:
+        - Organization
+
+  /organization/jobs:
+    get:
+      operationId: getOrganizationJobList
+      description: Get list of jobs for an organization
+      parameters:
+        - $ref: "#/components/parameters/pageSizeQuery"
+        - $ref: "#/components/parameters/pageTokenQuery"
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/JobResourceList"
+          description: GET Job list response
+      tags:
+        - Organization
+
   /user:
     get:
       operationId: getUserList
@@ -42,7 +282,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/UserObject"
+                  $ref: "#/components/schemas/UserResource"
           description: GET User list response
       tags:
         - User
@@ -56,7 +296,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UserObject"
+                $ref: "#/components/schemas/UserResource"
           description: GET User object response
       tags:
         - User
@@ -80,7 +320,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UserObject"
+                $ref: "#/components/schemas/UserResource"
           description: GET User object response
       tags:
         - User
@@ -91,20 +331,35 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/UserUpdatePayload"
+              $ref: "#/components/schemas/UserUpdatePut"
         required: true
       responses:
         "200":
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UserObject"
+                $ref: "#/components/schemas/UserResource"
           description: PUT User object response
       tags:
         - User
 
 components:
   parameters:
+    pageSizeQuery:
+      in: query
+      name: Page Size
+      required: true
+      schema:
+        type: integer
+        format: int32
+        minimum: 1
+        maximum: 100
+    pageTokenQuery:
+      in: query
+      name: Page Token
+      required: false
+      schema:
+        type: string
     usernamePath:
       description: Username
       in: path
@@ -129,7 +384,143 @@ components:
           type: string
           enum:
             - ok
-    UserObject:
+    JobResource:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        description:
+          type: string
+        organization:
+          type: string
+          format: uuid
+    JobResourceList:
+      allOf:
+        - $ref: "#/components/schemas/PaginationResponse"
+        - type: object
+          properties:
+            jobs:
+              type: array
+              items:
+                $ref: "#/components/schemas/JobResource"
+    JobPost:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+    JobPostingPost:
+      type: object
+      properties:
+        employmentType:
+          type: string
+          enum:
+            - full-time
+            - part-time
+            - contract
+            - temporary
+            - internship
+            - volunteer
+            - per-diem
+            - other
+        payRate:
+          type: number
+          format: float
+        payType:
+          type: string
+          enum:
+            - hourly
+            - salary
+            - commission
+            - other
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        publishOverride:
+          type: boolean
+    JobPostingResource:
+      type: object
+      properties:
+        employmentType:
+          type: string
+          enum:
+            - full-time
+            - part-time
+            - contract
+            - temporary
+            - internship
+            - volunteer
+            - per-diem
+            - other
+        payRate:
+          type: number
+          format: float
+        payType:
+          type: string
+          enum:
+            - hourly
+            - salary
+            - commission
+            - other
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        publishOverride:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    JobPostingResourceList:
+      allOf:
+        - $ref: "#/components/schemas/PaginationResponse"
+        - type: object
+          properties:
+            postings:
+              type: array
+              items:
+                $ref: "#/components/schemas/JobPostingResource"
+    OrganizationResource:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+        website:
+          type: string
+          format: uri
+    OrganizationPost:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        website:
+          type: string
+          format: uri
+    PaginationResponse:
+      type: object
+      properties:
+        nextPageToken:
+          type: string
+    UserResource:
       type: object
       properties:
         email:
@@ -144,7 +535,7 @@ components:
         username:
           type: string
           maxLength: 24
-    UserUpdatePayload:
+    UserUpdatePut:
       type: object
       properties:
         firstName:
