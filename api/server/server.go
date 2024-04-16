@@ -95,6 +95,12 @@ func (s *Server) routes() {
 		json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
 	})
 
+	r.Route("/organization", func(r chi.Router) {
+		r.With(withUserSession(true)).
+			With(s.withVerifiedEmail).
+			Post("/", s.handlePostOrganization)
+	})
+
 	r.Route("/user", func(r chi.Router) {
 		r.Get("/", s.handleGetUserList)
 		r.Post("/", s.handlePostUser)

@@ -1,0 +1,22 @@
+meta {
+  name: postJobPosting
+  type: http
+  seq: 5
+}
+
+post {
+  url: http://localhost:8080/job/{job_id}/posting
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "employmentType": "",
+    "payRate": "",
+    "payType": "",
+    "startDate": "",
+    "endDate": "",
+    "publishOverride": ""
+  }
+}
