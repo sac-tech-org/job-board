@@ -62,9 +62,9 @@ func withUserSession(required bool) func(http.Handler) http.Handler {
 	}
 }
 
-// withAccountOwner will validate that the user id in the request context is the same account as the
+// withResourceOwner will validate that the user id in the request context is the same account as the
 // named resource. It must be used after withUserSession.
-func (s *Server) withAccountOwner(param string) func(http.Handler) http.Handler {
+func (s *Server) withResourceOwner(param string) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()

@@ -105,7 +105,7 @@ func (s *Server) routes() {
 			r.Use(withUserSession(false))
 			r.Get("/", s.handleGetUser)
 			r.Group(func(r chi.Router) {
-				r.Use(s.withAccountOwner("username"))
+				r.Use(s.withResourceOwner("username"))
 				r.Delete("/", s.handleDeleteUser)
 				r.Put("/", s.handlePutUser)
 			})
