@@ -83,7 +83,7 @@ export interface UserPostRequest {
 
 export const UserPutConfig = {
   method: 'PUT',
-  path: '/user/{:username}',
+  path: '/user/:username',
 };
 
 export interface UserPutRequest {

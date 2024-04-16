@@ -2,7 +2,10 @@ package server
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
+
+	"golang.org/x/sync/errgroup"
 )
 
 type (
@@ -47,9 +50,9 @@ type (
 	}
 
 	UserMetadata struct {
-		FirstName string
-		LastName  string
-		Username  string
+		FirstName string `json:"firstName,omitempty"`
+		LastName  string `json:"lastName,omitempty"`
+		Username  string `json:"username,omitempty"`
 	}
 )
 
@@ -144,9 +147,29 @@ func (s *Server) handlePutUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ui, err := s.idStore.GetUser(id)
-	if err != nil {
-		respond(w, r, nil, err, 0)
+	g, errCTX := errgroup.WithContext(ctx)
+	g.SetLimit(2)
+
+	var ui UserIdentity
+	g.Go(func() error {
+		var err error
+		if ui, err = s.idStore.GetUser(id); err != nil {
+			return fmt.Errorf("error getting user identity: %w", err)
+		}
+
+		return nil
+	})
+
+	g.Go(func() error {
+		if err := s.dataStore.PutUser(errCTX, in.FirstName, id, in.LastName, in.Username); err != nil {
+			return fmt.Errorf("error updating user in db: %w", err)
+		}
+		return nil
+	})
+
+	if err := g.Wait(); err != nil {
+		hErr := HTTPError{http.StatusInternalServerError, "error updating user: " + err.Error()}
+		respond(w, r, nil, hErr, 0)
 		return
 	}
 

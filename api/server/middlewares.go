@@ -2,8 +2,11 @@ package server
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 	"net/http"
 
+	"github.com/go-chi/chi/v5"
 	"github.com/supertokens/supertokens-golang/recipe/session"
 	"github.com/supertokens/supertokens-golang/recipe/session/sessmodels"
 	"github.com/supertokens/supertokens-golang/supertokens"
@@ -55,6 +58,52 @@ func withUserSession(required bool) func(http.Handler) http.Handler {
 
 			// no session, continue
 			next.ServeHTTP(w, r)
+		})
+	}
+}
+
+// withResourceOwner will validate that the user id in the request context is the same account as the
+// named resource. It must be used after withUserSession.
+func (s *Server) withResourceOwner(param string) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			ctx := r.Context()
+			id := *ContextValue[string](ctx, userIDCTXKey)
+
+			p := chi.URLParam(r, param)
+			if p == "" {
+				hErr := HTTPError{http.StatusBadRequest, fmt.Sprintf("missing {%s} parameter", param)}
+				respond(w, r, nil, hErr, hErr.status)
+				return
+			}
+
+			u, err := s.dataStore.GetUser(ctx, GetUserInput{ID: id})
+			if err != nil {
+				respond(w, r, nil, err, 0)
+				return
+			}
+
+			b, err := json.Marshal(u)
+			if err != nil {
+				hErr := HTTPError{http.StatusInternalServerError, "error marshalling accountOwner data"}
+				respond(w, r, nil, hErr, hErr.status)
+				return
+			}
+
+			var m map[string]any
+			if err := json.Unmarshal(b, &m); err != nil {
+				hErr := HTTPError{http.StatusInternalServerError, "error unmarshalling accountOwner data"}
+				respond(w, r, nil, hErr, hErr.status)
+				return
+			}
+
+			if m[param] != p {
+				hErr := HTTPError{http.StatusForbidden, "accountOwner does not match request"}
+				respond(w, r, nil, hErr, hErr.status)
+				return
+			}
+
+			next.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}
 }
