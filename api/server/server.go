@@ -25,7 +25,7 @@ type DataStore interface {
 	DeleteUser(context.Context, DeleteUserInput) error
 	GetUser(context.Context, GetUserInput) (UserMetadata, error)
 	GetUserList(context.Context, GetUserListInput) ([]UserMetadata, error)
-	PutUser(context.Context, PutUserInput) (UserMetadata, error)
+	PutUser(ctx context.Context, first, id, last, username string) error
 }
 
 type IdentityStore interface {
@@ -103,9 +103,12 @@ func (s *Server) routes() {
 
 		r.Route("/{username}", func(r chi.Router) {
 			r.Use(withUserSession(false))
-			r.Delete("/", s.handleDeleteUser)
 			r.Get("/", s.handleGetUser)
-			r.Put("/", s.handlePutUser)
+			r.Group(func(r chi.Router) {
+				r.Use(s.withAccountOwner("username"))
+				r.Delete("/", s.handleDeleteUser)
+				r.Put("/", s.handlePutUser)
+			})
 		})
 	})
 

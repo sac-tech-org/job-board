@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -67,8 +68,49 @@ func (c *Client) QueryUserByID(ctx context.Context, id string) (datastore.User, 
 		FirstName: user.FirstName,
 		LastName:  user.LastName,
 		Username:  user.Username,
-		ID:        user.UUID,
+		ID:        user.UUID.String(),
 	}, nil
+}
+
+func (c *Client) UpdateUser(ctx context.Context, first, id, last, username string) error {
+	valMap := map[string]string{
+		"first_name": first,
+		"last_name":  last,
+		"username":   username,
+	}
+
+	var setLabels []string
+	var setVals []any
+	labelIDX := 1
+	for k, v := range valMap {
+		if v != "" {
+			setLabels = append(setLabels, fmt.Sprintf("%s = $%d", k, labelIDX))
+			setVals = append(setVals, v)
+			labelIDX++
+		}
+	}
+
+	if len(setLabels) == 0 {
+		return errors.New("no values to update")
+	}
+
+	setClause := "SET " + strings.Join(setLabels, ", ") + "\n"
+	whereClause := fmt.Sprintf("WHERE user_uuid = $%d;", labelIDX)
+	query := "UPDATE users.user\n" + setClause + whereClause
+	setVals = append(setVals, id)
+
+	return pgx.BeginFunc(ctx, c.db, func(tx pgx.Tx) error {
+		com, err := tx.Exec(ctx, query, setVals...)
+		if err != nil {
+			return fmt.Errorf("error updating user: %w", err)
+		}
+
+		if com.RowsAffected() != 1 {
+			return fmt.Errorf("expected 1 row affected, got %d", com.RowsAffected())
+		}
+
+		return nil
+	})
 }
 
 func (c *Client) UsernameExists(ctx context.Context, username string) (bool, error) {

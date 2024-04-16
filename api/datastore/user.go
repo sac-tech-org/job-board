@@ -3,14 +3,13 @@ package datastore
 import (
 	"context"
 
-	"github.com/google/uuid"
 	"github.com/rusher2004/job-board/api/server"
 )
 
 type User struct {
 	FirstName string
 	LastName  string
-	ID        uuid.UUID
+	ID        string
 	Username  string
 }
 
@@ -39,6 +38,6 @@ func (d DataStore) GetUserList(ctx context.Context, in server.GetUserListInput) 
 	return []server.UserMetadata{}, nil
 }
 
-func (d DataStore) PutUser(ctx context.Context, in server.PutUserInput) (server.UserMetadata, error) {
-	return server.UserMetadata{}, nil
+func (d DataStore) PutUser(ctx context.Context, first, id, last, username string) error {
+	return d.db.UpdateUser(ctx, first, id, last, username)
 }
