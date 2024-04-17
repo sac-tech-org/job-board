@@ -24,8 +24,8 @@ func (k *contextKey) String() string {
 var userIDCTXKey = &contextKey{"userID"}
 
 // ContextValue is a shortcut to fetch the value of type T from context.
-func ContextValue[T any](ctx context.Context, key *contextKey) *T {
-	val, _ := ctx.Value(key).(*T)
+func ContextValue[T any](ctx context.Context, key *contextKey) T {
+	val, _ := ctx.Value(key).(T)
 	return val
 }
 
@@ -68,7 +68,7 @@ func (s *Server) withResourceOwner(param string) func(http.Handler) http.Handler
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()
-			id := *ContextValue[string](ctx, userIDCTXKey)
+			id := ContextValue[string](ctx, userIDCTXKey)
 
 			p := chi.URLParam(r, param)
 			if p == "" {
@@ -111,7 +111,7 @@ func (s *Server) withResourceOwner(param string) func(http.Handler) http.Handler
 func (s *Server) withVerifiedEmail(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
-		id := *ContextValue[string](ctx, userIDCTXKey)
+		id := ContextValue[string](ctx, userIDCTXKey)
 
 		u, err := s.idStore.GetUser(id)
 		if err != nil {

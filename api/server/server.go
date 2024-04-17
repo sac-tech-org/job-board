@@ -21,6 +21,7 @@ type AuthStore interface {
 }
 
 type DataStore interface {
+	CreateOrganization(ctx context.Context, descr, name, userID, website string) (string, error)
 	CreateUser(context.Context, PostUserInput) error
 	DeleteUser(context.Context, DeleteUserInput) error
 	GetUser(context.Context, GetUserInput) (UserMetadata, error)
