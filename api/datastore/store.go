@@ -5,6 +5,7 @@ import (
 )
 
 type DBClient interface {
+	InsertOrganization(ctx context.Context, descr, name, userID, website string) (string, error)
 	InsertUser(ctx context.Context, first, id, last, username string) error
 	QueryUserByID(context.Context, string) (User, error)
 	UpdateUser(ctx context.Context, first, id, last, username string) error

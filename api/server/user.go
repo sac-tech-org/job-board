@@ -60,7 +60,7 @@ var UserNotFound = HTTPError{http.StatusNotFound, "User not found"}
 
 func (s *Server) handleDeleteUser(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	id := *ContextValue[string](ctx, userIDCTXKey)
+	id := ContextValue[string](ctx, userIDCTXKey)
 
 	if err := s.dataStore.DeleteUser(ctx, DeleteUserInput{id}); err != nil {
 		respond(w, r, nil, err, 0)
@@ -72,7 +72,7 @@ func (s *Server) handleDeleteUser(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) handleGetCurrentUser(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	id := *ContextValue[string](ctx, userIDCTXKey)
+	id := ContextValue[string](ctx, userIDCTXKey)
 
 	ui, err := s.idStore.GetUser(id)
 	if err != nil {
@@ -138,7 +138,7 @@ func (s *Server) handlePostUser(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) handlePutUser(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	id := *ContextValue[string](ctx, userIDCTXKey)
+	id := ContextValue[string](ctx, userIDCTXKey)
 
 	var in PutUserInput
 	if err := json.NewDecoder(r.Body).Decode(&in); err != nil {

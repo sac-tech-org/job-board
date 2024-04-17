@@ -1,0 +1,11 @@
+meta {
+  name: putJobPostingByID
+  type: http
+  seq: 6
+}
+
+put {
+  url: http://localhost:8080/job/{job_id}/posting
+  body: json
+  auth: none
+}

@@ -1,11 +1,11 @@
 meta {
-  name: Health
+  name: Health check endpoint
   type: http
   seq: 1
 }
 
 get {
-  url: /health
+  url: http://localhost:8080/health
   body: none
   auth: none
 }

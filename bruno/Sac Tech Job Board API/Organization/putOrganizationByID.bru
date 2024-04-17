@@ -1,0 +1,11 @@
+meta {
+  name: putOrganizationByID
+  type: http
+  seq: 3
+}
+
+put {
+  url: http://localhost:8080/organization/{org_id}
+  body: json
+  auth: none
+}

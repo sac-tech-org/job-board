@@ -1,0 +1,18 @@
+meta {
+  name: postJob
+  type: http
+  seq: 1
+}
+
+post {
+  url: http://localhost:8080/job
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "title": "",
+    "description": ""
+  }
+}

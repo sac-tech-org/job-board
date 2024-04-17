@@ -18,7 +18,8 @@ func NewDB(ctx context.Context, connString string) (Client, error) {
 		return Client{}, fmt.Errorf("error parsing db url: %w", err)
 	}
 
-	// explicitly set this because fly.io create another default db
+	// explicitly set this because fly.io creates a different default db per-project, and I don't want
+	// to trust whatever the conn string in the env is set to.
 	u.Path = "/board"
 	cfg, err := pgxpool.ParseConfig(u.String())
 	if err != nil {

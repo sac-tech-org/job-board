@@ -5,7 +5,15 @@ meta {
 }
 
 put {
-  url: http://localhost:8080/user/{user_uuid}
+  url: http://localhost:8080/user/{username}
   body: json
   auth: none
+}
+
+body:json {
+  {
+    "firstName": "",
+    "lastName": "",
+    "username": ""
+  }
 }

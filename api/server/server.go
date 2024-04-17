@@ -21,6 +21,7 @@ type AuthStore interface {
 }
 
 type DataStore interface {
+	CreateOrganization(ctx context.Context, descr, name, userID, website string) (string, error)
 	CreateUser(context.Context, PostUserInput) error
 	DeleteUser(context.Context, DeleteUserInput) error
 	GetUser(context.Context, GetUserInput) (UserMetadata, error)
@@ -93,6 +94,12 @@ func (s *Server) routes() {
 		w.WriteHeader(http.StatusOK)
 
 		json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
+	})
+
+	r.Route("/organization", func(r chi.Router) {
+		r.With(withUserSession(true)).
+			With(s.withVerifiedEmail).
+			Post("/", s.handlePostOrganization)
 	})
 
 	r.Route("/user", func(r chi.Router) {
